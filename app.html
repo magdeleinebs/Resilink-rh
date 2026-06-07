@@ -2,943 +2,1187 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Resilink-RH · App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <title>RésiLink RH</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Caveat:wght@600&display=swap" rel="stylesheet"/>
   <style>
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
     :root{
-      --ink:#0E0E0C;--ink2:#4A4A45;--ink3:#8A8A84;
-      --paper:#F5F3EE;--paper2:#EDEAE2;
-      --accent:#4340B0;--accent2:#6C69D4;
-      --success:#1D7D58;--danger:#B83232;--warning:#C8860A;
-      --radius:14px;--ff-serif:'Fraunces',Georgia,serif;--ff-sans:'DM Sans',sans-serif;
+      --teal:#2A9D8F; --teal2:#21867A; --teal3:#E6F7F5; --teal4:#B2E4DF;
+      --ink:#1A1A2E; --ink2:#4A4A6A; --ink3:#9090A8;
+      --bg:#F8F9FB; --bg2:#FFFFFF; --bg3:#F0F2F5;
+      --danger:#E63946; --warning:#F4A261; --success:#2A9D8F;
+      --gold:#E9C46A; --cream:#F7EDE2;
+      --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px; --r-full:999px;
+      --ff:'Nunito',sans-serif; --ff-brand:'Caveat',cursive;
+      --safe-bottom:env(safe-area-inset-bottom,0px);
     }
-    html,body{height:100%;font-family:var(--ff-sans);background:var(--paper);color:var(--ink);line-height:1.6;overflow-x:hidden;}
+    html,body{height:100%;overflow:hidden;font-family:var(--ff);background:var(--bg);color:var(--ink);}
+    button,input,textarea,select{font-family:var(--ff);}
     .hidden{display:none!important;}
-    button,input,textarea,select{font-family:var(--ff-sans);}
+    ::-webkit-scrollbar{width:0;height:0;}
 
-    /* ── AUTH GATE ── */
-    #auth-gate{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--paper);}
-    .gate-card{background:#fff;border:1px solid var(--paper2);border-radius:20px;padding:40px;text-align:center;max-width:360px;width:90%;}
-    .gate-logo{font-family:var(--ff-serif);font-size:24px;font-weight:600;margin-bottom:8px;}
-    .gate-logo span{color:var(--accent);}
-    .gate-sub{font-size:14px;color:var(--ink2);margin-bottom:24px;}
-    .spinner{width:32px;height:32px;border:3px solid var(--paper2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+    /* ═══ AUTH GATE ═══ */
+    #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--teal);z-index:999;}
+    .gate-inner{text-align:center;color:white;}
+    .gate-logo-img{width:200px;margin-bottom:16px;filter:brightness(0) invert(1);}
+    .gate-spin{width:32px;height:32px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto;}
     @keyframes spin{to{transform:rotate(360deg);}}
 
-    /* ── APP SHELL ── */
-    #app{display:none;min-height:100vh;display:none;flex-direction:column;}
-    .app-nav{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:56px;background:#fff;border-bottom:1px solid var(--paper2);position:sticky;top:0;z-index:100;}
-    .app-logo{font-family:var(--ff-serif);font-size:18px;font-weight:600;color:var(--ink);text-decoration:none;}
-    .app-logo span{color:var(--accent);}
-    .nav-right{display:flex;align-items:center;gap:10px;}
-    .notif-btn{position:relative;width:36px;height:36px;border-radius:50%;border:1px solid var(--paper2);background:var(--paper);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;}
-    .notif-badge{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:1px solid #fff;}
-    .user-chip{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:40px;border:1px solid var(--paper2);background:var(--paper);cursor:pointer;}
-    .user-ava{width:28px;height:28px;border-radius:50%;background:#EEEDFE;color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;}
-    .user-name{font-size:13px;font-weight:500;color:var(--ink);}
+    /* ═══ APP SHELL ═══ */
+    #app{position:fixed;inset:0;display:none;flex-direction:column;}
 
-    /* ── BOTTOM NAV (mobile) ── */
-    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--paper2);z-index:100;padding:8px 0 max(8px,env(safe-area-inset-bottom));}
-    .bn-inner{display:flex;justify-content:space-around;}
-    .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 12px;cursor:pointer;border:none;background:none;color:var(--ink3);transition:color .2s;}
-    .bn-item.active{color:var(--accent);}
-    .bn-icon{font-size:20px;line-height:1;}
-    .bn-label{font-size:10px;font-weight:500;}
+    /* ═══ TOP BAR ═══ */
+    .topbar{height:56px;background:var(--bg2);border-bottom:1px solid rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;position:relative;z-index:10;}
+    .topbar-logo{height:36px;}
+    .topbar-right{display:flex;align-items:center;gap:8px;}
+    .icon-btn{width:38px;height:38px;border-radius:50%;border:none;background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;position:relative;transition:background .15s;}
+    .icon-btn:active{background:var(--teal4);}
+    .notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--danger);border:1.5px solid var(--bg2);}
+    .user-btn{width:38px;height:38px;border-radius:50%;border:2px solid var(--teal);background:var(--teal3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--teal2);}
 
-    /* ── SIDE NAV (desktop) ── */
-    .app-body{display:flex;flex:1;}
-    .side-nav{width:220px;flex-shrink:0;background:#fff;border-right:1px solid var(--paper2);padding:20px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
-    .sn-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;border:none;background:none;color:var(--ink2);font-size:14px;font-weight:500;width:100%;text-align:left;transition:all .15s;}
-    .sn-item:hover{background:var(--paper);color:var(--ink);}
-    .sn-item.active{background:#EEEDFE;color:var(--accent);}
-    .sn-icon{font-size:18px;width:22px;text-align:center;}
-    .sn-badge{margin-left:auto;font-size:10px;padding:1px 6px;border-radius:10px;background:#FEF0F0;color:var(--danger);}
-    .sn-divider{height:1px;background:var(--paper2);margin:8px 0;}
-    .sn-label{font-size:11px;color:var(--ink3);padding:4px 12px;text-transform:uppercase;letter-spacing:.06em;}
-    .signout-btn{margin-top:auto;display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;border:none;background:none;color:var(--ink3);font-size:14px;width:100%;text-align:left;transition:all .15s;}
-    .signout-btn:hover{background:var(--paper2);color:var(--danger);}
+    /* ═══ CONTENT AREA ═══ */
+    .content{flex:1;overflow:hidden;position:relative;}
+    .screen{position:absolute;inset:0;overflow-y:auto;display:none;padding-bottom:calc(70px + var(--safe-bottom));}
+    .screen.active{display:block;}
+    .screen-inner{padding:16px;}
 
-    /* ── MAIN CONTENT ── */
-    .main-content{flex:1;overflow-y:auto;padding:32px;max-width:960px;}
-    .page{display:none;}
-    .page.active{display:block;}
-    .page-header{margin-bottom:28px;}
-    .page-title{font-family:var(--ff-serif);font-size:28px;font-weight:600;line-height:1.2;}
-    .page-sub{font-size:14px;color:var(--ink2);margin-top:4px;}
+    /* ═══ BOTTOM NAV ═══ */
+    .bottom-nav{height:calc(62px + var(--safe-bottom));background:var(--bg2);border-top:1px solid rgba(0,0,0,.06);display:flex;align-items:flex-start;padding-top:8px;flex-shrink:0;}
+    .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;padding:0;transition:color .2s;color:var(--ink3);}
+    .bn-item.active{color:var(--teal);}
+    .bn-icon{font-size:22px;line-height:1;}
+    .bn-label{font-size:10px;font-weight:600;}
+    .bn-badge{position:relative;}
+    .bn-badge::after{content:'';position:absolute;top:-2px;right:-4px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:1px solid var(--bg2);}
 
-    /* ── CARDS & GRIDS ── */
-    .card{background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);padding:20px;}
-    .card-title{font-size:15px;font-weight:500;color:var(--ink);margin-bottom:4px;}
-    .card-sub{font-size:13px;color:var(--ink2);margin-bottom:16px;}
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-
-    /* ── STAT CARDS ── */
-    .stat-card{background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);padding:16px;}
-    .stat-val{font-size:26px;font-weight:500;color:var(--ink);}
-    .stat-lbl{font-size:12px;color:var(--ink3);margin-top:2px;}
-    .stat-delta{font-size:11px;margin-top:4px;}
-    .stat-delta.up{color:var(--success);}
-    .stat-delta.down{color:var(--danger);}
-
-    /* ── BUTTONS ── */
-    .btn{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:40px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .2s;}
-    .btn-primary{background:var(--accent);color:#fff;}
-    .btn-primary:hover{background:#3330A0;}
-    .btn-secondary{background:var(--paper);color:var(--ink);border:1px solid var(--paper2);}
-    .btn-secondary:hover{background:var(--paper2);}
-    .btn-danger{background:#FEF0F0;color:var(--danger);border:1px solid #FECACA;}
-    .btn-sm{padding:6px 14px;font-size:12px;}
-
-    /* ── FORM ELEMENTS ── */
-    .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
-    .form-label{font-size:13px;font-weight:500;color:var(--ink2);}
-    .form-input{padding:10px 14px;border:1px solid var(--paper2);border-radius:10px;font-size:14px;color:var(--ink);background:var(--paper);outline:none;transition:border-color .2s;}
-    .form-input:focus{border-color:var(--accent2);background:#fff;box-shadow:0 0 0 3px rgba(67,64,176,.08);}
+    /* ═══ COMMON COMPONENTS ═══ */
+    .section-title{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:12px;}
+    .section-sub{font-size:13px;color:var(--ink3);margin-top:-8px;margin-bottom:14px;}
+    .card{background:var(--bg2);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:0 1px 8px rgba(0,0,0,.05);}
+    .card-sm{background:var(--bg2);border-radius:var(--r-md);padding:12px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+    .pill{display:inline-flex;align-items:center;padding:4px 12px;border-radius:var(--r-full);font-size:12px;font-weight:600;}
+    .pill-teal{background:var(--teal3);color:var(--teal2);}
+    .pill-warn{background:#FEF3E2;color:#C77A1A;}
+    .pill-danger{background:#FEE8E8;color:var(--danger);}
+    .pill-gray{background:var(--bg3);color:var(--ink3);}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:var(--r-full);font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .15s;letter-spacing:.01em;}
+    .btn:active{transform:scale(.97);}
+    .btn-teal{background:var(--teal);color:#fff;}
+    .btn-teal:active{background:var(--teal2);}
+    .btn-outline{background:transparent;color:var(--teal);border:2px solid var(--teal);}
+    .btn-ghost{background:var(--bg3);color:var(--ink2);}
+    .btn-full{width:100%;}
+    .btn-sm{padding:8px 16px;font-size:13px;}
+    .avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
+    .av-sm{width:36px;height:36px;font-size:13px;}
+    .av-md{width:44px;height:44px;font-size:16px;}
+    .av-lg{width:60px;height:60px;font-size:22px;}
+    .form-group{margin-bottom:14px;}
+    .form-label{font-size:13px;font-weight:600;color:var(--ink2);margin-bottom:6px;display:block;}
+    .form-input{width:100%;padding:13px 16px;border:1.5px solid rgba(0,0,0,.1);border-radius:var(--r-md);font-size:15px;color:var(--ink);background:var(--bg);outline:none;transition:border-color .2s;}
+    .form-input:focus{border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px rgba(42,157,143,.1);}
     .form-input::placeholder{color:var(--ink3);}
     textarea.form-input{resize:vertical;min-height:80px;}
     select.form-input{cursor:pointer;}
+    .tag{display:inline-flex;padding:3px 10px;border-radius:var(--r-full);font-size:11px;font-weight:600;}
+    .divider{height:1px;background:rgba(0,0,0,.06);margin:16px 0;}
+    .row{display:flex;align-items:center;gap:10px;}
+    .row-between{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 
-    /* ── MOOD BAR ── */
-    .mood-bar{background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:20px;}
-    .mood-label{font-size:13px;color:var(--ink2);flex-shrink:0;}
-    .mood-btns{display:flex;gap:6px;flex:1;}
-    .mood-btn{flex:1;padding:6px;border-radius:8px;border:1px solid var(--paper2);background:var(--paper);font-size:18px;cursor:pointer;text-align:center;transition:all .15s;}
-    .mood-btn:hover,.mood-btn.sel{border-color:var(--accent);background:#EEEDFE;}
+    /* ═══ NOTIF PANEL ═══ */
+    .notif-panel{position:absolute;top:56px;right:12px;width:min(320px,calc(100vw-24px));background:var(--bg2);border-radius:var(--r-lg);box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:50;overflow:hidden;}
+    .np-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,.06);}
+    .np-title{font-size:15px;font-weight:700;}
+    .np-clear{font-size:12px;color:var(--teal);border:none;background:none;cursor:pointer;font-weight:600;}
+    .np-item{display:flex;gap:10px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.04);transition:background .15s;}
+    .np-item:hover{background:var(--bg3);}
+    .np-item.unread{background:var(--teal3);}
+    .np-dot{width:8px;height:8px;border-radius:50%;background:var(--teal);flex-shrink:0;margin-top:4px;}
+    .np-text{font-size:13px;color:var(--ink);line-height:1.4;}
+    .np-time{font-size:11px;color:var(--ink3);margin-top:2px;}
 
-    /* ── COACH BANNER ── */
-    .coach-banner{background:var(--accent);border-radius:var(--radius);padding:18px 20px;margin-bottom:20px;cursor:pointer;transition:opacity .15s;}
-    .coach-banner:hover{opacity:.92;}
-    .coach-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-    .coach-ico{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:16px;}
-    .coach-bname{font-size:13px;font-weight:500;color:#fff;}
-    .coach-bsub{font-size:11px;color:rgba(255,255,255,.6);}
-    .coach-bmsg{font-size:14px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:10px;}
-    .coach-chips{display:flex;gap:6px;flex-wrap:wrap;}
-    .coach-chip{font-size:12px;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;cursor:pointer;border:1px solid rgba(255,255,255,.2);transition:background .15s;}
-    .coach-chip:hover{background:rgba(255,255,255,.25);}
+    /* ═══ DASHBOARD ═══ */
+    .greeting-card{background:var(--teal);border-radius:var(--r-xl);padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+    .gc-birds{position:absolute;top:8px;right:12px;font-size:28px;opacity:.25;}
+    .gc-hello{font-size:13px;color:rgba(255,255,255,.75);font-weight:600;}
+    .gc-name{font-size:22px;font-weight:700;color:#fff;margin:2px 0 4px;}
+    .gc-date{font-size:12px;color:rgba(255,255,255,.65);}
+    .mood-row{display:flex;gap:6px;margin-bottom:16px;}
+    .mood-btn{flex:1;padding:10px 4px;border-radius:var(--r-md);border:2px solid rgba(0,0,0,.06);background:var(--bg2);font-size:20px;cursor:pointer;text-align:center;transition:all .15s;}
+    .mood-btn.sel{border-color:var(--teal);background:var(--teal3);}
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+    .stat-box{background:var(--bg2);border-radius:var(--r-md);padding:12px 8px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.04);}
+    .stat-num{font-size:22px;font-weight:700;color:var(--ink);}
+    .stat-lbl{font-size:10px;color:var(--ink3);font-weight:600;margin-top:2px;}
+    .stat-alert{font-size:10px;color:var(--danger);font-weight:600;margin-top:2px;}
+    .coach-card{background:linear-gradient(135deg,var(--teal) 0%,var(--teal2) 100%);border-radius:var(--r-xl);padding:18px;margin-bottom:16px;cursor:pointer;}
+    .cc-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+    .cc-ico{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;}
+    .cc-name{font-size:14px;font-weight:700;color:#fff;}
+    .cc-sub{font-size:11px;color:rgba(255,255,255,.65);}
+    .cc-msg{font-size:13px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:10px;}
+    .cc-chips{display:flex;gap:6px;flex-wrap:wrap;}
+    .cc-chip{font-size:12px;padding:5px 12px;border-radius:var(--r-full);background:rgba(255,255,255,.18);color:#fff;cursor:pointer;font-weight:600;}
+    .newbies-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+    .newbie-card{flex-shrink:0;width:90px;text-align:center;cursor:pointer;}
+    .newbie-card .avatar{margin:0 auto 6px;}
+    .newbie-name{font-size:11px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .newbie-role{font-size:10px;color:var(--ink3);}
+    .new-badge{display:inline-block;font-size:9px;padding:1px 6px;border-radius:var(--r-full);background:var(--teal);color:#fff;font-weight:700;margin-bottom:4px;}
+    .feed-item{display:flex;gap:10px;align-items:flex-start;background:var(--bg2);border-radius:var(--r-lg);padding:14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;}
+    .fi-body{flex:1;min-width:0;}
+    .fi-name{font-size:13px;font-weight:700;color:var(--ink);}
+    .fi-text{font-size:12px;color:var(--ink2);margin-top:2px;line-height:1.4;}
+    .fi-time{font-size:11px;color:var(--ink3);flex-shrink:0;}
+    .reactions{display:flex;gap:6px;margin-top:8px;}
+    .react-btn{font-size:12px;padding:3px 10px;border-radius:var(--r-full);background:var(--bg3);border:1px solid rgba(0,0,0,.06);cursor:pointer;font-weight:600;transition:all .15s;}
+    .react-btn:active{background:var(--teal3);border-color:var(--teal4);}
 
-    /* ── KANBAN ── */
-    .kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;}
-    .k-col{flex:0 0 200px;background:var(--paper2);border-radius:var(--radius);padding:12px;min-height:400px;display:flex;flex-direction:column;}
-    .k-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-    .k-title{font-size:13px;font-weight:500;color:var(--ink2);}
-    .k-count{width:20px;height:20px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink3);}
-    .k-cards{flex:1;display:flex;flex-direction:column;gap:8px;}
-    .k-card{background:#fff;border:1px solid var(--paper2);border-radius:10px;padding:12px;cursor:pointer;transition:border-color .2s,transform .15s;}
-    .k-card:hover{border-color:var(--accent2);transform:translateY(-1px);}
-    .kc-co{font-size:13px;font-weight:500;color:var(--ink);}
-    .kc-role{font-size:12px;color:var(--ink2);margin-top:2px;}
-    .kc-date{font-size:11px;color:var(--ink3);margin-top:6px;}
-    .kc-relance{font-size:11px;margin-top:4px;display:flex;align-items:center;gap:4px;}
+    /* ═══ KANBAN ═══ */
+    .kanban-wrap{overflow-x:auto;padding-bottom:8px;}
+    .kanban{display:flex;gap:10px;min-width:max-content;}
+    .k-col{width:180px;background:var(--bg3);border-radius:var(--r-lg);padding:10px;display:flex;flex-direction:column;gap:6px;}
+    .k-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+    .k-col-title{font-size:12px;font-weight:700;color:var(--ink2);}
+    .k-col-count{width:20px;height:20px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--ink3);}
+    .k-card{background:var(--bg2);border-radius:var(--r-md);padding:10px;cursor:pointer;transition:all .2s;box-shadow:0 1px 4px rgba(0,0,0,.05);border:2px solid transparent;}
+    .k-card.dragging{opacity:.4;transform:scale(.95);}
+    .k-card.drag-over{border-color:var(--teal);background:var(--teal3);}
+    .k-col.drag-target{background:var(--teal4);}
+    .kc-co{font-size:13px;font-weight:700;color:var(--ink);}
+    .kc-role{font-size:11px;color:var(--ink2);margin-top:2px;}
+    .kc-date{font-size:10px;color:var(--ink3);margin-top:4px;}
+    .kc-relance{font-size:10px;margin-top:4px;font-weight:600;}
     .kc-relance.urgent{color:var(--danger);}
     .kc-relance.ok{color:var(--success);}
-    .add-btn{margin-top:8px;width:100%;padding:8px;border-radius:8px;border:1px dashed var(--ink3);background:transparent;font-size:12px;color:var(--ink3);cursor:pointer;transition:all .2s;}
-    .add-btn:hover{border-color:var(--accent);color:var(--accent);background:#EEEDFE;}
-    .add-form{background:#fff;border:1px solid var(--accent2);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;flex-direction:column;gap:8px;}
-    .add-form input{padding:8px 10px;border:1px solid var(--paper2);border-radius:8px;font-size:13px;color:var(--ink);background:var(--paper);outline:none;}
-    .add-form input:focus{border-color:var(--accent2);}
-    .add-form-row{display:flex;gap:6px;}
-    .btn-save{flex:1;padding:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;}
-    .btn-cancel-sm{padding:8px 12px;background:transparent;color:var(--ink3);border:1px solid var(--paper2);border-radius:8px;font-size:13px;cursor:pointer;}
+    .k-add-btn{width:100%;padding:8px;border-radius:var(--r-md);border:1.5px dashed var(--ink3);background:transparent;font-size:12px;color:var(--ink3);cursor:pointer;font-weight:600;transition:all .2s;}
+    .k-add-btn:active{border-color:var(--teal);color:var(--teal);background:var(--teal3);}
+    .relance-banner{background:#FEE8E8;border-radius:var(--r-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--danger);font-weight:600;display:flex;align-items:center;gap:8px;}
 
-    /* ── MATCHING ── */
-    .match-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;padding:8px 0;}
-    .match-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
-    .match-pill{font-size:13px;padding:7px 18px;border-radius:20px;border:1px solid var(--paper2);color:var(--ink2);cursor:pointer;background:#fff;transition:all .15s;}
-    .match-pill.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-    .profile-card{width:min(340px,100%);background:#fff;border:1px solid var(--paper2);border-radius:20px;overflow:hidden;}
-    .pc-top{padding:24px 24px 16px;}
-    .pc-ava{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;margin-bottom:12px;}
-    .pc-name{font-size:18px;font-weight:500;margin-bottom:2px;}
-    .pc-role{font-size:13px;color:var(--ink2);margin-bottom:10px;}
-    .pc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
-    .pc-tag{font-size:11px;padding:3px 10px;border-radius:20px;}
-    .pc-bio{font-size:13px;color:var(--ink2);line-height:1.5;}
-    .pc-bottom{border-top:1px solid var(--paper2);padding:12px 24px;display:flex;align-items:center;gap:8px;}
-    .pc-dot{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;}
-    .pc-avail{font-size:12px;color:var(--ink2);}
-    .match-score{display:flex;align-items:center;gap:10px;width:min(340px,100%);background:var(--paper2);border-radius:8px;padding:10px 14px;}
-    .ms-label{font-size:12px;color:var(--ink2);flex-shrink:0;}
-    .ms-track{flex:1;height:4px;background:var(--paper);border-radius:2px;overflow:hidden;}
-    .ms-fill{height:100%;border-radius:2px;background:var(--accent);transition:width .4s;}
-    .ms-pct{font-size:13px;font-weight:500;min-width:32px;text-align:right;}
-    .match-btns{display:flex;gap:16px;}
-    .mbtn{border-radius:50%;border:1px solid var(--paper2);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:22px;}
-    .mbtn-pass{width:52px;height:52px;}
-    .mbtn-pass:hover{background:#FEF0F0;}
-    .mbtn-connect{width:60px;height:60px;background:var(--accent);border-color:var(--accent);font-size:24px;}
-    .mbtn-connect:hover{background:#3330A0;}
-    .mbtn-msg{width:52px;height:52px;}
-    .mbtn-msg:hover{background:var(--paper2);}
-    .match-fb{font-size:13px;color:var(--ink3);min-height:20px;text-align:center;}
+    /* ═══ MODAL ═══ */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+    .modal-sheet{background:var(--bg2);border-radius:var(--r-xl) var(--r-xl) 0 0;width:100%;max-width:600px;padding:20px;padding-bottom:calc(20px + var(--safe-bottom));max-height:90vh;overflow-y:auto;}
+    .modal-handle{width:36px;height:4px;border-radius:2px;background:var(--bg3);margin:0 auto 16px;}
+    .modal-title{font-size:18px;font-weight:700;margin-bottom:16px;}
 
-    /* ── MESSAGES ── */
-    .msg-layout{display:flex;gap:0;height:calc(100vh - 180px);background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);overflow:hidden;}
-    .msg-sidebar{width:260px;border-right:1px solid var(--paper2);display:flex;flex-direction:column;}
-    .msg-sidebar-head{padding:14px 16px;border-bottom:1px solid var(--paper2);display:flex;align-items:center;justify-content:space-between;}
-    .msg-sidebar-title{font-size:14px;font-weight:500;}
-    .msg-search{width:100%;padding:8px 12px;border:none;border-bottom:1px solid var(--paper2);font-size:13px;color:var(--ink);background:var(--paper);outline:none;}
-    .msg-search::placeholder{color:var(--ink3);}
-    .msg-list{flex:1;overflow-y:auto;}
-    .msg-conv{display:flex;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--paper2);transition:background .15s;}
-    .msg-conv:hover,.msg-conv.active{background:#EEEDFE;}
-    .mc-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;}
-    .mc-body{flex:1;min-width:0;}
-    .mc-name{font-size:13px;font-weight:500;color:var(--ink);}
-    .mc-preview{font-size:12px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .mc-time{font-size:11px;color:var(--ink3);flex-shrink:0;}
-    .mc-unread{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0;}
-    .msg-main{flex:1;display:flex;flex-direction:column;}
-    .msg-main-head{padding:14px 18px;border-bottom:1px solid var(--paper2);display:flex;align-items:center;gap:10px;}
-    .msg-main-name{font-size:14px;font-weight:500;}
-    .msg-main-role{font-size:12px;color:var(--ink2);}
-    .msg-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
-    .chat-msg{display:flex;gap:8px;align-items:flex-end;}
-    .chat-msg.me{flex-direction:row-reverse;}
-    .chat-bubble{max-width:70%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;}
-    .chat-msg.other .chat-bubble{background:var(--paper2);color:var(--ink);border-radius:4px 16px 16px 16px;}
-    .chat-msg.me .chat-bubble{background:var(--accent);color:#fff;border-radius:16px 4px 16px 16px;}
-    .chat-ava{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;}
-    .msg-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--paper2);}
-    .msg-input{flex:1;border:1px solid var(--paper2);background:var(--paper2);border-radius:20px;padding:9px 14px;font-size:13px;color:var(--ink);outline:none;}
-    .msg-send{width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;font-size:16px;color:#fff;flex-shrink:0;}
+    /* ═══ CALENDRIER ═══ */
+    .cal-wrap{background:var(--bg2);border-radius:var(--r-lg);padding:16px;margin-bottom:12px;box-shadow:0 1px 8px rgba(0,0,0,.05);}
+    .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    .cal-month{font-size:15px;font-weight:700;}
+    .cal-nav{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg3);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+    .cal-dow{font-size:10px;font-weight:700;color:var(--ink3);text-align:center;padding:4px 0;}
+    .cal-day{aspect-ratio:1;border-radius:var(--r-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:13px;font-weight:600;position:relative;transition:all .15s;}
+    .cal-day:hover{background:var(--teal3);}
+    .cal-day.today{background:var(--teal);color:#fff;}
+    .cal-day.has-event::after{content:'';position:absolute;bottom:3px;width:5px;height:5px;border-radius:50%;background:var(--warning);}
+    .cal-day.today.has-event::after{background:#fff;}
+    .cal-day.selected{background:var(--teal3);border:2px solid var(--teal);}
+    .cal-day.empty{pointer-events:none;}
+    .cal-events{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+    .cal-event-item{display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:var(--r-md);cursor:pointer;transition:background .15s;}
+    .cal-event-item:hover{background:var(--bg3);}
+    .cei-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .cei-title{font-size:13px;font-weight:600;color:var(--ink);}
+    .cei-time{font-size:11px;color:var(--ink3);}
 
-    /* ── COACH IA ── */
-    .coach-wrap{background:#fff;border:1px solid var(--paper2);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;height:calc(100vh - 200px);min-height:500px;}
-    .coach-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--paper2);}
-    .c-ico{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
-    .c-name{font-size:14px;font-weight:500;}
-    .c-status{font-size:11px;color:var(--success);display:flex;align-items:center;gap:4px;}
-    .c-dot{width:6px;height:6px;border-radius:50%;background:var(--success);}
-    .coach-modes{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap;}
-    .mode-pill{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--paper2);color:var(--ink2);cursor:pointer;background:var(--paper);transition:all .15s;}
-    .mode-pill.active{background:#EEEDFE;color:var(--accent);border-color:var(--accent2);}
-    .coach-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+    /* ═══ EVENTS ═══ */
+    .event-card{background:var(--bg2);border-radius:var(--r-lg);padding:14px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.05);cursor:pointer;}
+    .ec-top{display:flex;gap:12px;align-items:center;}
+    .ec-date{width:44px;text-align:center;flex-shrink:0;}
+    .ec-day{font-size:24px;font-weight:700;color:var(--teal);line-height:1;}
+    .ec-month{font-size:10px;color:var(--ink3);font-weight:700;text-transform:uppercase;}
+    .ec-info h4{font-size:14px;font-weight:700;}
+    .ec-info p{font-size:12px;color:var(--ink2);margin-top:2px;}
+    .ec-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.06);}
+    .ec-gauge-wrap{flex:1;margin-right:12px;}
+    .ec-gauge-label{font-size:11px;color:var(--ink3);margin-bottom:4px;font-weight:600;}
+    .ec-gauge{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+    .ec-gauge-fill{height:100%;border-radius:3px;background:var(--teal);transition:width .3s;}
+    .ec-gauge-full{background:var(--danger);}
+    .ec-count{font-size:12px;font-weight:700;color:var(--ink);}
+    .join-btn{padding:8px 18px;border-radius:var(--r-full);border:none;background:var(--teal);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;flex-shrink:0;}
+    .join-btn:active{background:var(--teal2);}
+    .join-btn.joined{background:var(--bg3);color:var(--ink3);}
+    .join-btn.full{background:var(--bg3);color:var(--danger);cursor:default;}
+
+    /* ═══ MATCHING ═══ */
+    .match-screen{display:flex;flex-direction:column;align-items:center;padding:16px;gap:14px;}
+    .match-type-row{display:flex;gap:8px;width:100%;overflow-x:auto;padding-bottom:2px;}
+    .mt-pill{flex-shrink:0;padding:8px 16px;border-radius:var(--r-full);font-size:13px;font-weight:700;border:2px solid rgba(0,0,0,.08);background:var(--bg2);color:var(--ink2);cursor:pointer;transition:all .15s;}
+    .mt-pill.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+    .profile-swipe-card{width:100%;max-width:380px;background:var(--bg2);border-radius:var(--r-xl);overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.1);}
+    .psc-top{padding:20px;}
+    .psc-header{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;}
+    .psc-name{font-size:20px;font-weight:700;margin-bottom:2px;}
+    .psc-role{font-size:13px;color:var(--ink2);}
+    .psc-avail{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--success);font-weight:600;margin-top:4px;}
+    .psc-avail-dot{width:7px;height:7px;border-radius:50%;background:var(--success);}
+    .psc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+    .psc-bio{font-size:14px;color:var(--ink2);line-height:1.6;}
+    .psc-bottom{border-top:1px solid rgba(0,0,0,.06);padding:12px 20px;}
+    .score-bar{display:flex;align-items:center;gap:10px;}
+    .score-label{font-size:12px;color:var(--ink3);font-weight:600;flex-shrink:0;}
+    .score-track{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+    .score-fill{height:100%;border-radius:3px;background:var(--teal);transition:width .4s;}
+    .score-pct{font-size:13px;font-weight:700;min-width:34px;text-align:right;}
+    .swipe-btns{display:flex;gap:16px;align-items:center;}
+    .swipe-btn{border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-size:22px;}
+    .swipe-btn:active{transform:scale(.9);}
+    .sb-pass{width:54px;height:54px;background:#FEE8E8;color:var(--danger);}
+    .sb-connect{width:64px;height:64px;background:var(--teal);color:#fff;font-size:26px;}
+    .sb-msg{width:54px;height:54px;background:var(--bg3);color:var(--ink2);}
+    .swipe-feedback{font-size:13px;color:var(--ink3);min-height:18px;font-weight:600;}
+
+    /* ═══ COMMUNAUTÉS ═══ */
+    .filters-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;}
+    .filter-chip{flex-shrink:0;padding:7px 14px;border-radius:var(--r-full);font-size:12px;font-weight:700;border:2px solid rgba(0,0,0,.08);background:var(--bg2);color:var(--ink2);cursor:pointer;transition:all .15s;}
+    .filter-chip.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+    .community-card{background:var(--bg2);border-radius:var(--r-xl);padding:16px;margin-bottom:10px;box-shadow:0 1px 8px rgba(0,0,0,.06);cursor:pointer;transition:transform .15s;}
+    .community-card:active{transform:scale(.98);}
+    .comm-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+    .comm-icon{width:44px;height:44px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    .comm-name{font-size:15px;font-weight:700;}
+    .comm-desc{font-size:12px;color:var(--ink2);margin-top:2px;}
+    .comm-footer{display:flex;align-items:center;justify-content:space-between;}
+    .comm-members-row{display:flex;}
+    .comm-av{width:24px;height:24px;border-radius:50%;border:2px solid var(--bg2);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-left:-6px;}
+    .comm-av:first-child{margin-left:0;}
+    .comm-count{font-size:12px;color:var(--ink3);font-weight:600;margin-left:6px;}
+    .comm-level{font-size:11px;padding:3px 10px;border-radius:var(--r-full);font-weight:700;}
+
+    /* Community detail */
+    .comm-detail-header{background:var(--teal);border-radius:var(--r-xl);padding:20px;margin-bottom:14px;color:#fff;}
+    .cdh-back{font-size:13px;color:rgba(255,255,255,.75);cursor:pointer;margin-bottom:10px;display:inline-flex;align-items:center;gap:4px;font-weight:600;}
+    .cdh-name{font-size:22px;font-weight:700;margin-bottom:4px;}
+    .cdh-desc{font-size:13px;color:rgba(255,255,255,.8);}
+    .member-card-list{display:flex;gap:12px;align-items:center;background:var(--bg2);border-radius:var(--r-lg);padding:12px 14px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.05);transition:transform .15s;}
+    .member-card-list:active{transform:scale(.98);}
+    .mcl-info{flex:1;}
+    .mcl-name{font-size:14px;font-weight:700;}
+    .mcl-role{font-size:12px;color:var(--ink2);}
+    .mcl-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;}
+    .mcl-avail{font-size:11px;color:var(--success);font-weight:600;display:flex;align-items:center;gap:4px;}
+    .mcl-avail-dot{width:6px;height:6px;border-radius:50%;background:var(--success);}
+    .mcl-action{padding:7px 14px;border-radius:var(--r-full);border:none;background:var(--teal3);color:var(--teal2);font-size:12px;font-weight:700;cursor:pointer;}
+
+    /* ═══ OFFRES RÉSEAU ═══ */
+    .offre-card{background:var(--bg2);border-radius:var(--r-xl);padding:16px;margin-bottom:10px;box-shadow:0 1px 8px rgba(0,0,0,.06);cursor:pointer;transition:transform .15s;}
+    .offre-card:active{transform:scale(.98);}
+    .oc-top{display:flex;gap:12px;margin-bottom:10px;}
+    .oc-logo{width:44px;height:44px;border-radius:var(--r-md);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .oc-title{font-size:15px;font-weight:700;}
+    .oc-company{font-size:13px;color:var(--ink2);}
+    .oc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+    .oc-footer{display:flex;align-items:center;justify-content:space-between;}
+    .oc-by{font-size:12px;color:var(--ink3);}
+    .oc-btn{padding:7px 16px;border-radius:var(--r-full);border:none;background:var(--teal);color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+
+    /* ═══ COACH IA ═══ */
+    .coach-screen{display:flex;flex-direction:column;height:100%;}
+    .coach-body{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
     .cmsg{display:flex;gap:8px;align-items:flex-end;}
     .cmsg.user{flex-direction:row-reverse;}
-    .cmsg-bubble{max-width:78%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;}
-    .cmsg.coach .cmsg-bubble{background:var(--paper2);color:var(--ink);border-radius:4px 16px 16px 16px;}
-    .cmsg.user .cmsg-bubble{background:var(--accent);color:#fff;border-radius:16px 4px 16px 16px;}
-    .cmsg-ava{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;}
-    .coach-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 8px;}
-    .c-chip{font-size:12px;padding:6px 12px;border-radius:20px;border:1px solid var(--paper2);color:var(--ink2);cursor:pointer;background:var(--paper);transition:all .15s;}
-    .c-chip:hover{border-color:var(--accent);color:var(--accent);background:#EEEDFE;}
-    .coach-input-row{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--paper2);align-items:center;}
-    .coach-input{flex:1;border:none;background:var(--paper2);border-radius:20px;padding:9px 14px;font-size:13px;color:var(--ink);outline:none;}
-    .coach-send{width:34px;height:34px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;font-size:16px;color:#fff;flex-shrink:0;}
-    .typing{display:flex;gap:4px;align-items:center;padding:10px 14px;}
-    .typing span{width:6px;height:6px;border-radius:50%;background:var(--ink3);animation:blink 1.2s infinite;}
+    .cmsg-bubble{max-width:78%;padding:11px 15px;font-size:14px;line-height:1.5;}
+    .cmsg.coach .cmsg-bubble{background:var(--bg3);color:var(--ink);border-radius:4px 18px 18px 18px;}
+    .cmsg.user .cmsg-bubble{background:var(--teal);color:#fff;border-radius:18px 4px 18px 18px;}
+    .cmsg-ava{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+    .coach-chips-row{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;border-top:1px solid rgba(0,0,0,.06);}
+    .c-chip{flex-shrink:0;font-size:12px;padding:7px 14px;border-radius:var(--r-full);border:1.5px solid rgba(0,0,0,.1);background:var(--bg2);color:var(--ink2);cursor:pointer;font-weight:600;transition:all .15s;}
+    .c-chip:active{background:var(--teal3);border-color:var(--teal);color:var(--teal2);}
+    .coach-modes-row{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;background:var(--bg2);border-bottom:1px solid rgba(0,0,0,.06);}
+    .c-mode{flex-shrink:0;font-size:12px;padding:6px 14px;border-radius:var(--r-full);border:1.5px solid rgba(0,0,0,.1);background:var(--bg3);color:var(--ink2);cursor:pointer;font-weight:700;transition:all .15s;}
+    .c-mode.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+    .coach-input-bar{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(0,0,0,.06);background:var(--bg2);}
+    .ci-input{flex:1;border:1.5px solid rgba(0,0,0,.1);background:var(--bg3);border-radius:var(--r-full);padding:10px 16px;font-size:14px;color:var(--ink);outline:none;}
+    .ci-input:focus{border-color:var(--teal);}
+    .ci-send{width:40px;height:40px;border-radius:50%;background:var(--teal);border:none;cursor:pointer;font-size:18px;color:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+    .typing span{width:6px;height:6px;border-radius:50%;background:var(--ink3);animation:blink 1.2s infinite;display:inline-block;margin:0 1px;}
     .typing span:nth-child(2){animation-delay:.2s;}
     .typing span:nth-child(3){animation-delay:.4s;}
     @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 
-    /* ── PROFIL ── */
-    .profile-header{display:flex;align-items:center;gap:20px;background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
-    .profile-ava-big{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:500;flex-shrink:0;}
-    .profile-info h2{font-size:20px;font-weight:500;}
-    .profile-info p{font-size:14px;color:var(--ink2);}
-    .profile-complete{margin-left:auto;text-align:right;}
-    .complete-val{font-size:24px;font-weight:500;color:var(--accent);}
-    .complete-lbl{font-size:12px;color:var(--ink3);}
-    .complete-bar{width:80px;height:4px;background:var(--paper2);border-radius:2px;margin-top:4px;overflow:hidden;}
-    .complete-fill{height:100%;background:var(--accent);border-radius:2px;}
+    /* ═══ MESSAGES ═══ */
+    .msg-screen{display:flex;flex-direction:column;height:100%;}
+    .conv-list{flex:1;overflow-y:auto;}
+    .conv-item{display:flex;gap:10px;padding:12px 16px;cursor:pointer;border-bottom:1px solid rgba(0,0,0,.04);transition:background .15s;}
+    .conv-item:active{background:var(--teal3);}
+    .conv-item.active{background:var(--teal3);}
+    .ci-body{flex:1;min-width:0;}
+    .ci-name{font-size:14px;font-weight:700;}
+    .ci-preview{font-size:12px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+    .ci-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+    .ci-time{font-size:11px;color:var(--ink3);}
+    .ci-unread{width:8px;height:8px;border-radius:50%;background:var(--teal);}
+    .chat-view{display:flex;flex-direction:column;height:100%;}
+    .chat-topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.06);background:var(--bg2);}
+    .chat-back{font-size:22px;cursor:pointer;color:var(--teal);}
+    .chat-body{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:10px;}
+    .chat-msg{display:flex;gap:8px;align-items:flex-end;}
+    .chat-msg.me{flex-direction:row-reverse;}
+    .chat-bubble{max-width:72%;padding:10px 14px;font-size:14px;line-height:1.5;}
+    .chat-msg.other .chat-bubble{background:var(--bg3);color:var(--ink);border-radius:4px 16px 16px 16px;}
+    .chat-msg.me .chat-bubble{background:var(--teal);color:#fff;border-radius:16px 4px 16px 16px;}
+    .chat-av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+    .chat-input-bar{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(0,0,0,.06);background:var(--bg2);}
+    .chat-inp{flex:1;border:1.5px solid rgba(0,0,0,.1);background:var(--bg3);border-radius:var(--r-full);padding:10px 16px;font-size:14px;color:var(--ink);outline:none;}
+    .chat-send{width:40px;height:40px;border-radius:50%;background:var(--teal);border:none;cursor:pointer;font-size:18px;color:#fff;flex-shrink:0;}
 
-    /* ── NOTIFS ── */
-    .notif-panel{position:absolute;top:60px;right:16px;width:320px;background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);box-shadow:0 8px 32px rgba(0,0,0,.1);z-index:200;}
-    .notif-head{padding:14px 16px;border-bottom:1px solid var(--paper2);display:flex;align-items:center;justify-content:space-between;}
-    .notif-title{font-size:14px;font-weight:500;}
-    .notif-clear{font-size:12px;color:var(--accent);cursor:pointer;border:none;background:none;}
-    .notif-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--paper2);cursor:pointer;transition:background .15s;}
-    .notif-item:hover{background:var(--paper);}
-    .notif-item.unread{background:#EEEDFE20;}
-    .notif-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:4px;}
-    .notif-text{font-size:13px;color:var(--ink);line-height:1.4;}
-    .notif-time{font-size:11px;color:var(--ink3);margin-top:2px;}
-
-    /* ── COMMUNAUTÉ ── */
-    .victory-input{width:100%;padding:12px 16px;border:1px solid var(--paper2);border-radius:var(--radius);background:#fff;font-size:14px;color:var(--ink);margin-bottom:16px;cursor:pointer;text-align:left;transition:border-color .2s;}
-    .victory-input:hover{border-color:var(--accent2);}
-    .event-card{display:flex;gap:16px;align-items:center;background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);padding:14px 18px;cursor:pointer;transition:border-color .2s,transform .15s;margin-bottom:10px;}
-    .event-card:hover{border-color:var(--accent2);transform:translateY(-1px);}
-    .event-date-box{width:44px;text-align:center;flex-shrink:0;}
-    .event-day{font-size:22px;font-weight:500;color:var(--accent);line-height:1;}
-    .event-month{font-size:10px;color:var(--ink3);text-transform:uppercase;}
-    .event-info h4{font-size:14px;font-weight:500;}
-    .event-info p{font-size:12px;color:var(--ink2);}
-    .event-join{margin-left:auto;padding:6px 14px;border-radius:20px;border:1px solid var(--paper2);background:var(--paper);font-size:12px;color:var(--ink2);cursor:pointer;transition:all .15s;}
-    .event-join:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
-    .member-card{display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);margin-bottom:8px;cursor:pointer;transition:border-color .2s;}
-    .member-card:hover{border-color:var(--accent2);}
-    .member-ava{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;flex-shrink:0;}
-    .member-info h4{font-size:14px;font-weight:500;}
-    .member-info p{font-size:12px;color:var(--ink2);}
-    .member-mood{margin-left:auto;font-size:20px;}
-    .victory-post{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--paper2);border-radius:var(--radius);padding:14px;margin-bottom:10px;}
-    .vp-emoji{font-size:24px;flex-shrink:0;}
-    .vp-body h4{font-size:13px;font-weight:500;}
-    .vp-body p{font-size:12px;color:var(--ink2);margin-top:2px;}
-    .vp-reactions{display:flex;gap:6px;margin-top:8px;}
-    .vp-reaction{font-size:12px;padding:3px 10px;border-radius:20px;background:var(--paper);border:1px solid var(--paper2);cursor:pointer;transition:background .15s;}
-    .vp-reaction:hover{background:var(--paper2);}
-
-    /* ── RESPONSIVE ── */
-    @media(max-width:768px){
-      .side-nav{display:none;}
-      .bottom-nav{display:block;}
-      .main-content{padding:20px 16px 80px;}
-      .grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}
-      .kanban{flex-wrap:nowrap;}
-      .msg-layout{height:calc(100vh - 160px);}
-      .msg-sidebar{width:200px;}
-      .coach-wrap{height:calc(100vh - 160px);}
-      .profile-header{flex-wrap:wrap;}
-      .profile-complete{margin-left:0;text-align:left;}
-      .notif-panel{width:calc(100vw - 32px);right:16px;}
-    }
-    @media(max-width:480px){
-      .msg-sidebar{display:none;}
-      .msg-layout{border-radius:0;border:none;}
-    }
+    /* ═══ PROFIL ═══ */
+    .profile-hero{background:var(--teal);border-radius:var(--r-xl);padding:24px;margin-bottom:14px;text-align:center;}
+    .ph-ava{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.25);color:#fff;font-size:28px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
+    .ph-name{font-size:20px;font-weight:700;color:#fff;}
+    .ph-title{font-size:13px;color:rgba(255,255,255,.75);margin-top:2px;}
+    .completeness{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.15);border-radius:var(--r-md);padding:8px 12px;margin-top:12px;}
+    .comp-track{flex:1;height:5px;background:rgba(255,255,255,.3);border-radius:3px;overflow:hidden;}
+    .comp-fill{height:100%;background:#fff;border-radius:3px;}
+    .comp-pct{font-size:12px;font-weight:700;color:#fff;}
+    .avail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px;}
+    .avail-slot{padding:8px 4px;border-radius:var(--r-md);border:2px solid rgba(0,0,0,.08);background:var(--bg2);font-size:11px;font-weight:700;text-align:center;cursor:pointer;color:var(--ink2);transition:all .15s;}
+    .avail-slot.sel{border-color:var(--teal);background:var(--teal3);color:var(--teal2);}
+    .save-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--teal);color:#fff;padding:10px 20px;border-radius:var(--r-full);font-size:13px;font-weight:700;z-index:300;pointer-events:none;opacity:0;transition:opacity .3s;}
+    .save-toast.show{opacity:1;}
   </style>
 </head>
 <body>
 
-<!-- AUTH GATE -->
-<div id="auth-gate">
-  <div class="gate-card">
-    <div class="gate-logo">Resilink<span>-RH</span></div>
-    <p class="gate-sub">Chargement en cours…</p>
-    <div class="spinner"></div>
+<!-- GATE -->
+<div id="gate">
+  <div class="gate-inner">
+    <img class="gate-logo-img" src="logo.png" alt="RésiLink RH" onerror="this.style.display='none';document.getElementById('gate-text').style.display='block'"/>
+    <div id="gate-text" style="display:none;font-family:'Caveat',cursive;font-size:36px;font-weight:600;margin-bottom:16px;">RésiLink RH</div>
+    <div class="gate-spin"></div>
   </div>
 </div>
 
 <!-- APP -->
-<div id="app" style="display:none;flex-direction:column;min-height:100vh;">
-
-  <!-- TOP NAV -->
-  <nav class="app-nav">
-    <a href="index.html" class="app-logo">Resilink<span>-RH</span></a>
-    <div class="nav-right">
-      <div class="notif-btn" onclick="toggleNotifs()" title="Notifications">
-        🔔<div class="notif-badge" id="notif-badge"></div>
-      </div>
-      <div class="user-chip" onclick="goProfile()">
-        <div class="user-ava" id="user-ava">?</div>
-        <span class="user-name" id="user-name">…</span>
-      </div>
+<div id="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <img src="logo.png" class="topbar-logo" alt="RésiLink RH" onerror="this.outerHTML='<span style=\'font-family:Caveat,cursive;font-size:22px;font-weight:600;color:var(--teal);\'>RésiLink RH</span>'"/>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="toggleNotifs()" aria-label="Notifications">
+        🔔<div class="notif-dot" id="notif-dot"></div>
+      </button>
+      <div class="user-btn" id="user-btn" onclick="goScreen('profil')">?</div>
     </div>
-  </nav>
+  </div>
 
   <!-- NOTIF PANEL -->
-  <div id="notif-panel" class="notif-panel hidden">
-    <div class="notif-head">
-      <span class="notif-title">Notifications</span>
-      <button class="notif-clear" onclick="clearNotifs()">Tout marquer lu</button>
-    </div>
-    <div class="notif-item unread" onclick="goPage('candidatures')">
-      <div class="notif-dot"></div>
-      <div><div class="notif-text">⚠️ Relance recommandée — Accenture, pas de réponse depuis 8 jours</div><div class="notif-time">Il y a 2h</div></div>
-    </div>
-    <div class="notif-item unread" onclick="goPage('matching')">
-      <div class="notif-dot"></div>
-      <div><div class="notif-text">🤝 Sophie M. a accepté ta demande de mise en relation</div><div class="notif-time">Il y a 4h</div></div>
-    </div>
-    <div class="notif-item unread" onclick="goPage('community')">
-      <div class="notif-dot"></div>
-      <div><div class="notif-text">📅 Rappel : Café virtuel du cercle demain à 12h</div><div class="notif-time">Il y a 6h</div></div>
-    </div>
-    <div class="notif-item" onclick="goPage('messages')">
-      <div class="notif-dot" style="opacity:0"></div>
-      <div><div class="notif-text">💬 Nouveau message de Philippe L.</div><div class="notif-time">Hier</div></div>
-    </div>
+  <div id="notif-panel" class="notif-panel hidden" style="position:fixed;top:60px;right:12px;">
+    <div class="np-head"><span class="np-title">Notifications</span><button class="np-clear" onclick="clearNotifs()">Tout lu</button></div>
+    <div class="np-item unread" onclick="goScreen('candidatures');closeNotifs()"><div class="np-dot"></div><div><div class="np-text">⚠️ Relance recommandée — Accenture, +7 jours</div><div class="np-time">Il y a 2h</div></div></div>
+    <div class="np-item unread" onclick="goScreen('matching');closeNotifs()"><div class="np-dot"></div><div><div class="np-text">🤝 Sophie M. a accepté ta demande</div><div class="np-time">Il y a 4h</div></div></div>
+    <div class="np-item unread" onclick="goScreen('communautes');closeNotifs()"><div class="np-dot"></div><div><div class="np-text">📅 Café virtuel du cercle demain 12h</div><div class="np-time">Il y a 6h</div></div></div>
+    <div class="np-item" onclick="goScreen('messages');closeNotifs()"><div class="np-dot" style="opacity:0"></div><div><div class="np-text">💬 Nouveau message de Philippe L.</div><div class="np-time">Hier</div></div></div>
   </div>
 
-  <div class="app-body">
-    <!-- SIDE NAV -->
-    <nav class="side-nav">
-      <span class="sn-label">Principal</span>
-      <button class="sn-item active" onclick="goPage('dashboard',this)"><span class="sn-icon">🏠</span>Accueil</button>
-      <button class="sn-item" onclick="goPage('profile',this)"><span class="sn-icon">👤</span>Mon profil</button>
-      <div class="sn-divider"></div>
-      <span class="sn-label">Recherche</span>
-      <button class="sn-item" onclick="goPage('candidatures',this)"><span class="sn-icon">🔍</span>Candidatures<span class="sn-badge" id="badge-relance" style="display:none">!</span></button>
-      <button class="sn-item" onclick="goPage('matching',this)"><span class="sn-icon">🤝</span>Matching</button>
-      <button class="sn-item" onclick="goPage('coach',this)"><span class="sn-icon">🧠</span>Coach IA</button>
-      <div class="sn-divider"></div>
-      <span class="sn-label">Social</span>
-      <button class="sn-item" onclick="goPage('messages',this)"><span class="sn-icon">💬</span>Messages</button>
-      <button class="sn-item" onclick="goPage('community',this)"><span class="sn-icon">👥</span>Communauté</button>
-      <button class="signout-btn" onclick="doSignOut()"><span class="sn-icon">🚪</span>Déconnexion</button>
-    </nav>
+  <!-- CONTENT -->
+  <div class="content">
 
-    <!-- MAIN -->
-    <main class="main-content">
+    <!-- ── ACCUEIL ── -->
+    <div id="screen-accueil" class="screen active">
+      <div class="screen-inner">
+        <div class="greeting-card">
+          <div class="gc-birds">🐦🐦🐦</div>
+          <div class="gc-hello">Bonjour,</div>
+          <div class="gc-name" id="gc-name">…</div>
+          <div class="gc-date" id="gc-date"></div>
+        </div>
+        <div class="mood-row">
+          <div class="mood-btn" onclick="pickMood(this)">😔</div>
+          <div class="mood-btn" onclick="pickMood(this)">😕</div>
+          <div class="mood-btn sel" onclick="pickMood(this)">😐</div>
+          <div class="mood-btn" onclick="pickMood(this)">🙂</div>
+          <div class="mood-btn" onclick="pickMood(this)">😊</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="st-c">0</div><div class="stat-lbl">Candidatures</div></div>
+          <div class="stat-box"><div class="stat-num" id="st-e">0</div><div class="stat-lbl">Entretiens</div></div>
+          <div class="stat-box"><div class="stat-num" id="st-r">0</div><div class="stat-lbl">À relancer</div><div class="stat-alert" id="st-r-alert"></div></div>
+          <div class="stat-box"><div class="stat-num" id="st-o">0</div><div class="stat-lbl">Offres</div></div>
+        </div>
+        <div class="coach-card" onclick="goScreen('coach')">
+          <div class="cc-top"><div class="cc-ico">🧠</div><div><div class="cc-name">Alex · Coach IA</div><div class="cc-sub">Disponible 24h/24</div></div></div>
+          <div class="cc-msg">"Prêt·e à préparer ton prochain entretien ou travailler ton pitch ?"</div>
+          <div class="cc-chips">
+            <span class="cc-chip" onclick="event.stopPropagation();openCoach('Prépare un entretien réseau avec moi.')">Préparer entretien</span>
+            <span class="cc-chip" onclick="event.stopPropagation();openCoach('Travaillons mon pitch de 2 minutes.')">Mon pitch</span>
+            <span class="cc-chip" onclick="event.stopPropagation();openCoach('J\'ai besoin d\'un boost de motivation.')">Boost moral</span>
+          </div>
+        </div>
+        <div class="section-title">Nouveaux membres 🆕</div>
+        <div class="newbies-row" id="newbies-row">
+          <div class="newbie-card"><div class="avatar av-md" style="background:#E6F7F5;color:#2A9D8F;">ML</div><div class="new-badge">Nouveau</div><div class="newbie-name">Marie L.</div><div class="newbie-role">Finance</div></div>
+          <div class="newbie-card"><div class="avatar av-md" style="background:#FEF3E2;color:#C77A1A;">JD</div><div class="new-badge">Nouveau</div><div class="newbie-name">Jean D.</div><div class="newbie-role">Marketing</div></div>
+          <div class="newbie-card"><div class="avatar av-md" style="background:#F3E8FF;color:#7C3AED;">SB</div><div class="new-badge">Nouveau</div><div class="newbie-name">Sara B.</div><div class="newbie-role">RH</div></div>
+          <div class="newbie-card"><div class="avatar av-md" style="background:#FEE8E8;color:#E63946;">CR</div><div class="new-badge">Nouveau</div><div class="newbie-name">Cyril R.</div><div class="newbie-role">Ops</div></div>
+          <div class="newbie-card"><div class="avatar av-md" style="background:#E6F7F5;color:#2A9D8F;">NF</div><div class="new-badge">Nouveau</div><div class="newbie-name">Nadia F.</div><div class="newbie-role">Tech</div></div>
+        </div>
+        <div class="section-title">Fil communauté</div>
+        <div class="feed-item"><div class="avatar av-sm" style="background:#E6F7F5;color:#2A9D8F;">SM</div><div class="fi-body"><div class="fi-name">Sophie M. <span style="font-weight:400;color:var(--ink3);font-size:11px;">victoire</span></div><div class="fi-text">Premier entretien chez Michelin obtenu ! 🎉</div><div class="reactions"><span class="react-btn" onclick="react(this,'👏')">👏 12</span><span class="react-btn" onclick="react(this,'🔥')">🔥 5</span></div></div><span class="fi-time">9min</span></div>
+        <div class="feed-item"><div class="avatar av-sm" style="background:#E8F0FE;color:#1A73E8;">PL</div><div class="fi-body"><div class="fi-name">Philippe L. <span style="font-weight:400;color:var(--ink3);font-size:11px;">événement</span></div><div class="fi-text">Atelier "Négocier son package" · mer 18h</div><div class="reactions"><span class="react-btn" onclick="react(this,'✋')">✋ 8</span></div></div><span class="fi-time">1h</span></div>
+        <div class="feed-item"><div class="avatar av-sm" style="background:#FCE8F0;color:#C0194A;">AC</div><div class="fi-body"><div class="fi-name">Amira C. <span style="font-weight:400;color:var(--ink3);font-size:11px;">bon plan</span></div><div class="fi-text">DRH Doctolib cherche une dir. marketing — contact direct possible</div><div class="reactions"><span class="react-btn" onclick="react(this,'🙏')">🙏 15</span><span class="react-btn" onclick="react(this,'👀')">👀 9</span></div></div><span class="fi-time">2h</span></div>
+      </div>
+    </div>
 
-      <!-- DASHBOARD -->
-      <div id="page-dashboard" class="page active">
-        <div class="page-header">
-          <h1 class="page-title" id="greeting">Bonjour 👋</h1>
-          <p class="page-sub" id="dateline"></p>
+    <!-- ── CANDIDATURES ── -->
+    <div id="screen-candidatures" class="screen">
+      <div class="screen-inner">
+        <div class="row-between" style="margin-bottom:16px;">
+          <div><div class="section-title" style="margin-bottom:0;">Candidatures</div><div style="font-size:12px;color:var(--ink3);">Glisse les cartes entre colonnes</div></div>
+          <button class="btn btn-teal btn-sm" onclick="showAddModal()">+ Ajouter</button>
         </div>
-        <div class="mood-bar">
-          <span class="mood-label">Comment tu te sens ?</span>
-          <div class="mood-btns">
-            <div class="mood-btn" onclick="pickMood(this,'😔')">😔</div>
-            <div class="mood-btn" onclick="pickMood(this,'😕')">😕</div>
-            <div class="mood-btn sel" onclick="pickMood(this,'😐')">😐</div>
-            <div class="mood-btn" onclick="pickMood(this,'🙂')">🙂</div>
-            <div class="mood-btn" onclick="pickMood(this,'😊')">😊</div>
+        <div id="relance-banner" class="relance-banner hidden">⚠️ <span id="relance-n">0</span> candidature(s) à relancer</div>
+
+        <!-- CALENDRIER -->
+        <div class="cal-wrap">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calNav(-1)">‹</button>
+            <span class="cal-month" id="cal-month"></span>
+            <button class="cal-nav" onclick="calNav(1)">›</button>
           </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="cal-events" id="cal-events"></div>
         </div>
-        <div class="grid-4" style="margin-bottom:20px;">
-          <div class="stat-card"><div class="stat-val" id="st-cand">0</div><div class="stat-lbl">Candidatures</div><div class="stat-delta up" id="st-cand-d"></div></div>
-          <div class="stat-card"><div class="stat-val" id="st-entretien">0</div><div class="stat-lbl">En entretien</div></div>
-          <div class="stat-card"><div class="stat-val" id="st-relance">0</div><div class="stat-lbl">À relancer</div><div class="stat-delta down" id="st-relance-d"></div></div>
-          <div class="stat-card"><div class="stat-val" id="st-offre">0</div><div class="stat-lbl">Offres reçues</div></div>
-        </div>
-        <div class="coach-banner" onclick="goPage('coach')">
-          <div class="coach-top"><div class="coach-ico">🧠</div><div><p class="coach-bname">Alex · coach IA</p><p class="coach-bsub">Disponible 24h/24</p></div></div>
-          <p class="coach-bmsg">"Bonjour ! Prêt·e à préparer ton prochain entretien, travailler ton pitch ou simplement débriefer ta semaine ?"</p>
-          <div class="coach-chips">
-            <span class="coach-chip" onclick="event.stopPropagation();openCoach('Aide-moi à préparer un entretien réseau.')">Préparer un entretien</span>
-            <span class="coach-chip" onclick="event.stopPropagation();openCoach('Je veux travailler mon pitch de 2 minutes.')">Mon pitch</span>
-            <span class="coach-chip" onclick="event.stopPropagation();openCoach('J\'ai besoin d\'un boost de motivation.')">Boost moral</span>
-          </div>
-        </div>
-        <div class="grid-2">
-          <div>
-            <h3 style="font-size:13px;font-weight:500;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Fil communauté</h3>
-            <div class="victory-post"><div class="vp-emoji">🎯</div><div class="vp-body"><h4>Sophie M. — Premier entretien chez Michelin !</h4><p>Il y a 9 minutes · Réseau RH</p><div class="vp-reactions"><span class="vp-reaction">👏 12</span><span class="vp-reaction">🔥 5</span><span class="vp-reaction">💪 8</span></div></div></div>
-            <div class="victory-post"><div class="vp-emoji">📞</div><div class="vp-body"><h4>Thomas G. — 3 entretiens réseau confirmés</h4><p>Il y a 3 heures · Ops & Scale-up</p><div class="vp-reactions"><span class="vp-reaction">👏 7</span><span class="vp-reaction">🚀 4</span></div></div></div>
-          </div>
-          <div>
-            <h3 style="font-size:13px;font-weight:500;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Prochains événements</h3>
-            <div class="event-card"><div class="event-date-box"><div class="event-day">09</div><div class="event-month">Jun</div></div><div class="event-info"><h4>Café virtuel du cercle</h4><p>12h00 · En ligne · 6 membres</p></div><button class="event-join">Rejoindre</button></div>
-            <div class="event-card"><div class="event-date-box"><div class="event-day">11</div><div class="event-month">Jun</div></div><div class="event-info"><h4>Atelier Négocier son package</h4><p>18h00 · Philippe L.</p></div><button class="event-join">S'inscrire</button></div>
-          </div>
+
+        <div class="kanban-wrap">
+          <div class="kanban" id="kanban"></div>
         </div>
       </div>
+    </div>
 
-      <!-- PROFIL -->
-      <div id="page-profile" class="page">
-        <div class="page-header"><h1 class="page-title">Mon profil</h1><p class="page-sub">Complète ton profil pour améliorer le matching et la visibilité.</p></div>
-        <div class="profile-header">
-          <div class="profile-ava-big" id="profile-ava-big" style="background:#EEEDFE;color:#3C3489;"></div>
-          <div class="profile-info">
-            <h2 id="profile-fullname">—</h2>
-            <p id="profile-email-display">—</p>
-          </div>
-          <div class="profile-complete">
-            <div class="complete-val" id="complete-pct">0%</div>
-            <div class="complete-lbl">Profil complété</div>
-            <div class="complete-bar"><div class="complete-fill" id="complete-bar-fill" style="width:0%"></div></div>
-          </div>
+    <!-- ── MATCHING ── -->
+    <div id="screen-matching" class="screen">
+      <div class="match-screen">
+        <div style="width:100%;"><div class="section-title" style="margin-bottom:4px;">Matching réseau</div><div style="font-size:13px;color:var(--ink3);margin-bottom:12px;">Trouve tes prochains entretiens</div></div>
+        <div class="match-type-row">
+          <div class="mt-pill active" onclick="setMType(this)">🤝 Réseau</div>
+          <div class="mt-pill" onclick="setMType(this)">🧠 Coach</div>
+          <div class="mt-pill" onclick="setMType(this)">👥 Pair</div>
+          <div class="mt-pill" onclick="setMType(this)">🌟 Mentor</div>
         </div>
-        <div class="grid-2">
-          <div class="card">
-            <h3 class="card-title">Informations personnelles</h3>
-            <p class="card-sub">Visibles par les membres de la communauté</p>
-            <div class="form-group"><label class="form-label">Prénom et nom</label><input class="form-input" id="pf-name" placeholder="Claire Dupont"/></div>
-            <div class="form-group"><label class="form-label">Titre professionnel</label><input class="form-input" id="pf-title" placeholder="Directrice des Opérations · Scale-up"/></div>
-            <div class="form-group"><label class="form-label">Ville</label><input class="form-input" id="pf-city" placeholder="Paris"/></div>
-            <div class="form-group"><label class="form-label">Secteur</label>
-              <select class="form-input" id="pf-sector">
-                <option value="">— Choisir —</option>
-                <option>Direction générale</option><option>Finance & Contrôle</option><option>RH & Talent</option><option>Marketing & Com</option><option>Opérations & Supply</option><option>Tech & Digital</option><option>Commercial & Dév.</option>
-              </select>
-            </div>
-            <button class="btn btn-primary" onclick="saveProfile()">Enregistrer</button>
-          </div>
-          <div class="card">
-            <h3 class="card-title">Ma recherche</h3>
-            <p class="card-sub">Aide le matching à te trouver les bonnes personnes</p>
-            <div class="form-group"><label class="form-label">Stade de recherche</label>
-              <select class="form-input" id="pf-stage">
-                <option value="">— Choisir —</option>
-                <option>Recherche active</option><option>En veille discrète</option><option>Reconversion</option><option>En poste, je construis</option>
-              </select>
-            </div>
-            <div class="form-group"><label class="form-label">Type de poste visé</label><input class="form-input" id="pf-target" placeholder="DAF, DG, VP Finance…"/></div>
-            <div class="form-group"><label class="form-label">Disponible pour</label>
-              <select class="form-input" id="pf-available">
-                <option value="">— Choisir —</option>
-                <option>Entretiens réseau</option><option>Être mentor/coopter</option><option>Chercher un binôme</option><option>Rester discret</option>
-              </select>
-            </div>
-            <div class="form-group"><label class="form-label">Pitch (2-3 phrases)</label><textarea class="form-input" id="pf-pitch" placeholder="Ex: Directrice Ops avec 12 ans en scale-up. Je cherche un rôle de COO dans une entreprise en forte croissance. Ma valeur : structurer sans bureaucratiser."></textarea></div>
-            <button class="btn btn-primary" onclick="saveProfile()">Enregistrer</button>
-          </div>
-        </div>
-        <div id="save-confirm" class="hidden" style="margin-top:12px;padding:12px 16px;background:#EBF7F2;color:var(--success);border-radius:10px;font-size:14px;">✅ Profil enregistré avec succès !</div>
-      </div>
-
-      <!-- CANDIDATURES -->
-      <div id="page-candidatures" class="page">
-        <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
-          <div><h1 class="page-title">Candidatures</h1><p class="page-sub">Suis ton pipeline, relance au bon moment.</p></div>
-          <button class="btn btn-primary" onclick="showAddCandidature()">+ Ajouter</button>
-        </div>
-        <div id="add-cand-form" class="card hidden" style="margin-bottom:20px;">
-          <h3 class="card-title" style="margin-bottom:16px;">Nouvelle candidature</h3>
-          <div class="grid-2">
-            <div class="form-group"><label class="form-label">Entreprise *</label><input class="form-input" id="nc-company" placeholder="Nom de l'entreprise"/></div>
-            <div class="form-group"><label class="form-label">Poste visé *</label><input class="form-input" id="nc-role" placeholder="Titre du poste"/></div>
-            <div class="form-group"><label class="form-label">Date d'envoi</label><input class="form-input" type="date" id="nc-date"/></div>
-            <div class="form-group"><label class="form-label">Statut</label>
-              <select class="form-input" id="nc-status">
-                <option value="envoyee">Envoyée</option><option value="attente">En attente</option><option value="entretien">Entretien</option><option value="offre">Offre</option>
-              </select>
-            </div>
-            <div class="form-group" style="grid-column:1/-1;"><label class="form-label">Notes</label><textarea class="form-input" id="nc-notes" placeholder="Contact, source de l'offre, impressions…" style="min-height:60px;"></textarea></div>
-          </div>
-          <div style="display:flex;gap:8px;"><button class="btn btn-primary" onclick="saveCandidature()">Enregistrer</button><button class="btn btn-secondary" onclick="cancelCandidature()">Annuler</button></div>
-        </div>
-        <div id="relance-alert" class="hidden" style="background:#FEF0F0;border:1px solid #FECACA;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--danger);">
-          ⚠️ <strong id="relance-count">0</strong> candidature(s) sans réponse depuis plus de 7 jours — pense à relancer !
-        </div>
-        <div class="kanban" id="kanban"></div>
-      </div>
-
-      <!-- MATCHING -->
-      <div id="page-matching" class="page">
-        <div class="page-header"><h1 class="page-title">Matching réseau</h1><p class="page-sub">Trouve des pairs, coachs et contacts pour des entretiens.</p></div>
-        <div class="match-wrap">
-          <div class="match-pills">
-            <div class="match-pill active" onclick="setMType(this,'reseau')">🤝 Entretien réseau</div>
-            <div class="match-pill" onclick="setMType(this,'coach')">🧠 Coach</div>
-            <div class="match-pill" onclick="setMType(this,'pair')">👥 Pair</div>
-          </div>
-          <div class="profile-card">
-            <div class="pc-top">
-              <div id="pc-ava" class="pc-ava"></div>
-              <p id="pc-name" class="pc-name"></p>
-              <p id="pc-role" class="pc-role"></p>
-              <div id="pc-tags" class="pc-tags"></div>
-              <p id="pc-bio" class="pc-bio"></p>
-            </div>
-            <div class="pc-bottom"><div class="pc-dot"></div><span id="pc-avail" class="pc-avail"></span></div>
-          </div>
-          <div class="match-score">
-            <span class="ms-label">Affinité</span>
-            <div class="ms-track"><div id="ms-fill" class="ms-fill"></div></div>
-            <span id="ms-pct" class="ms-pct"></span>
-          </div>
-          <div class="match-btns">
-            <button class="mbtn mbtn-pass" onclick="mPass()" title="Passer">✕</button>
-            <button class="mbtn mbtn-connect" onclick="mConnect()" title="Connecter" style="color:#fff;">♥</button>
-            <button class="mbtn mbtn-msg" onclick="mMsg()" title="Message">💬</button>
-          </div>
-          <div id="match-fb" class="match-fb"></div>
-        </div>
-      </div>
-
-      <!-- COACH IA -->
-      <div id="page-coach" class="page">
-        <div class="page-header"><h1 class="page-title">Coach IA · Alex</h1><p class="page-sub">Ton copilote de carrière, disponible à tout moment.</p></div>
-        <div class="coach-wrap">
-          <div class="coach-head">
-            <div class="c-ico">🧠</div>
-            <div><p class="c-name">Alex · coach IA</p><p class="c-status"><span class="c-dot"></span>En ligne</p></div>
-            <div class="coach-modes">
-              <div class="mode-pill active" onclick="setMode(this,'prep')">Préparation</div>
-              <div class="mode-pill" onclick="setMode(this,'moral')">Moral</div>
-              <div class="mode-pill" onclick="setMode(this,'cv')">CV & pitch</div>
-              <div class="mode-pill" onclick="setMode(this,'nego')">Négociation</div>
-            </div>
-          </div>
-          <div class="coach-body" id="coach-body">
-            <div class="cmsg coach"><div class="cmsg-ava" style="background:var(--accent);color:#fff;">A</div><div class="cmsg-bubble">Bonjour ! Je suis Alex, ton coach de carrière dédié. Je peux t'aider à préparer tes entretiens, travailler ton pitch, te soutenir moralement, ou préparer une négociation salariale. Par quoi on commence ?</div></div>
-          </div>
-          <div class="coach-chips">
-            <div class="c-chip" onclick="sendC('Aide-moi à préparer un entretien réseau avec un DG.')">Préparer un entretien</div>
-            <div class="c-chip" onclick="sendC('Je veux travailler mon pitch de 2 minutes.')">Mon pitch</div>
-            <div class="c-chip" onclick="sendC('J\'ai besoin d\'un boost de motivation, je me sens découragé·e.')">Boost moral</div>
-            <div class="c-chip" onclick="sendC('Comment négocier mon salaire lors d\'une offre ?')">Négocier son salaire</div>
-            <div class="c-chip" onclick="sendC('Simule un entretien avec moi en jeu de rôle.')">Simuler un entretien</div>
-          </div>
-          <div class="coach-input-row">
-            <input class="coach-input" id="coach-inp" placeholder="Écris à Alex…" onkeydown="if(event.key==='Enter')sendCoach()"/>
-            <button class="coach-send" onclick="sendCoach()">➤</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- MESSAGES -->
-      <div id="page-messages" class="page">
-        <div class="page-header"><h1 class="page-title">Messages</h1><p class="page-sub">Tes échanges avec les membres de la communauté.</p></div>
-        <div class="msg-layout">
-          <div class="msg-sidebar">
-            <div class="msg-sidebar-head"><span class="msg-sidebar-title">Conversations</span></div>
-            <input class="msg-search" placeholder="Rechercher…" oninput="filterConvs(this.value)"/>
-            <div class="msg-list" id="conv-list">
-              <div class="msg-conv active" onclick="openConv(this,'SM','Sophie M.','DRH · Paris','#EEEDFE','#3C3489')">
-                <div class="mc-ava" style="background:#EEEDFE;color:#3C3489;">SM</div>
-                <div class="mc-body"><div class="mc-name">Sophie M.</div><div class="mc-preview">Merci pour les conseils !</div></div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><span class="mc-time">9min</span><div class="mc-unread"></div></div>
-              </div>
-              <div class="msg-conv" onclick="openConv(this,'PL','Philippe L.','Coach · Lyon','#E1F5EE','#085041')">
-                <div class="mc-ava" style="background:#E1F5EE;color:#085041;">PL</div>
-                <div class="mc-body"><div class="mc-name">Philippe L.</div><div class="mc-preview">Tu es dispo jeudi pour un café ?</div></div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><span class="mc-time">1h</span><div class="mc-unread"></div></div>
-              </div>
-              <div class="msg-conv" onclick="openConv(this,'AC','Amira C.','Dir. Marketing · Paris','#FBEAF0','#72243E')">
-                <div class="mc-ava" style="background:#FBEAF0;color:#72243E;">AC</div>
-                <div class="mc-body"><div class="mc-name">Amira C.</div><div class="mc-preview">Top, à bientôt !</div></div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><span class="mc-time">2h</span></div>
-              </div>
-              <div class="msg-conv" onclick="openConv(this,'TG','Thomas G.','Ex-VP Ops · Paris','#FAEEDA','#633806')">
-                <div class="mc-ava" style="background:#FAEEDA;color:#633806;">TG</div>
-                <div class="mc-body"><div class="mc-name">Thomas G.</div><div class="mc-preview">J'ai un contact chez Doctolib</div></div>
-                <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;"><span class="mc-time">Hier</span></div>
+        <div class="profile-swipe-card" id="swipe-card">
+          <div class="psc-top">
+            <div class="psc-header">
+              <div id="psc-ava" class="avatar av-lg"></div>
+              <div>
+                <div id="psc-name" class="psc-name"></div>
+                <div id="psc-role" class="psc-role"></div>
+                <div class="psc-avail"><div class="psc-avail-dot"></div><span id="psc-avail"></span></div>
               </div>
             </div>
+            <div id="psc-tags" class="psc-tags"></div>
+            <div id="psc-bio" class="psc-bio"></div>
           </div>
-          <div class="msg-main">
-            <div class="msg-main-head" id="msg-head">
-              <div class="mc-ava" id="msg-ava" style="background:#EEEDFE;color:#3C3489;">SM</div>
-              <div><div class="msg-main-name" id="msg-cname">Sophie M.</div><div class="msg-main-role" id="msg-crole">DRH · Paris</div></div>
-            </div>
-            <div class="msg-body" id="msg-body">
-              <div class="chat-msg other"><div class="chat-ava" style="background:#EEEDFE;color:#3C3489;">SM</div><div class="chat-bubble">Bonjour ! Merci pour ton message, je serais ravie d'échanger sur mon parcours RH.</div></div>
-              <div class="chat-msg me"><div class="chat-ava" style="background:#EEEDFE;color:var(--accent);">Moi</div><div class="chat-bubble">Super, merci ! Je cherche à comprendre les codes du secteur industriel côté RH.</div></div>
-              <div class="chat-msg other"><div class="chat-ava" style="background:#EEEDFE;color:#3C3489;">SM</div><div class="chat-bubble">Avec plaisir ! Je suis dispo jeudi ou vendredi matin cette semaine. 30 min en visio ?</div></div>
-              <div class="chat-msg me"><div class="chat-ava" style="background:#EEEDFE;color:var(--accent);">Moi</div><div class="chat-bubble">Parfait, jeudi 10h me va très bien !</div></div>
-              <div class="chat-msg other"><div class="chat-ava" style="background:#EEEDFE;color:#3C3489;">SM</div><div class="chat-bubble">Merci pour les conseils lors de notre échange ! 🙏</div></div>
-            </div>
-            <div class="msg-input-row">
-              <input class="msg-input" id="msg-input" placeholder="Écris ton message…" onkeydown="if(event.key==='Enter')sendMsg()"/>
-              <button class="msg-send" onclick="sendMsg()">➤</button>
+          <div class="psc-bottom">
+            <div class="score-bar">
+              <span class="score-label">Affinité</span>
+              <div class="score-track"><div id="score-fill" class="score-fill"></div></div>
+              <span id="score-pct" class="score-pct"></span>
             </div>
           </div>
+        </div>
+        <div class="swipe-btns">
+          <button class="swipe-btn sb-pass" onclick="sPass()">✕</button>
+          <button class="swipe-btn sb-connect" onclick="sConnect()">♥</button>
+          <button class="swipe-btn sb-msg" onclick="goScreen('messages')">💬</button>
+        </div>
+        <div id="swipe-fb" class="swipe-feedback"></div>
+      </div>
+    </div>
+
+    <!-- ── COMMUNAUTÉS ── -->
+    <div id="screen-communautes" class="screen">
+      <div class="screen-inner" id="comm-list-view">
+        <div class="section-title">Communautés</div>
+        <div class="section-sub">Rejoins un groupe par secteur et niveau</div>
+        <div class="filters-row" id="sector-filters">
+          <div class="filter-chip active" onclick="filterComm(this,'all')">Tous</div>
+          <div class="filter-chip" onclick="filterComm(this,'finance')">Finance</div>
+          <div class="filter-chip" onclick="filterComm(this,'rh')">RH</div>
+          <div class="filter-chip" onclick="filterComm(this,'marketing')">Marketing</div>
+          <div class="filter-chip" onclick="filterComm(this,'ops')">Opérations</div>
+          <div class="filter-chip" onclick="filterComm(this,'tech')">Tech</div>
+          <div class="filter-chip" onclick="filterComm(this,'dg')">Direction</div>
+        </div>
+        <div class="filters-row" id="level-filters">
+          <div class="filter-chip active" onclick="filterLevel(this,'all')">Tous niveaux</div>
+          <div class="filter-chip" onclick="filterLevel(this,'junior')">Junior</div>
+          <div class="filter-chip" onclick="filterLevel(this,'intermediaire')">Intermédiaire</div>
+          <div class="filter-chip" onclick="filterLevel(this,'senior')">Senior</div>
+          <div class="filter-chip" onclick="filterLevel(this,'dirigeant')">Cadres dirigeants</div>
+        </div>
+        <div id="comm-grid"></div>
+      </div>
+      <div class="screen-inner hidden" id="comm-detail-view">
+        <!-- dynamique -->
+      </div>
+    </div>
+
+    <!-- ── OFFRES RÉSEAU ── -->
+    <div id="screen-offres" class="screen">
+      <div class="screen-inner">
+        <div class="row-between" style="margin-bottom:16px;">
+          <div><div class="section-title" style="margin-bottom:0;">Offres du réseau</div><div style="font-size:12px;color:var(--ink3);">Partagées par les membres</div></div>
+          <button class="btn btn-teal btn-sm" onclick="showOffreModal()">+ Déposer</button>
+        </div>
+        <div class="filters-row">
+          <div class="filter-chip active" onclick="filterChip(this)">Toutes</div>
+          <div class="filter-chip" onclick="filterChip(this)">CDI</div>
+          <div class="filter-chip" onclick="filterChip(this)">Freelance</div>
+          <div class="filter-chip" onclick="filterChip(this)">Cooptation</div>
+          <div class="filter-chip" onclick="filterChip(this)">Conseil</div>
+        </div>
+        <div id="offres-list">
+          <div class="offre-card"><div class="oc-top"><div class="oc-logo">🏢</div><div><div class="oc-title">Directeur·rice Financier·ère</div><div class="oc-company">Scale-up SaaS · Paris · CDI</div></div></div><div class="oc-tags"><span class="tag pill-teal">Finance</span><span class="tag pill-warn">Senior</span><span class="tag pill-gray">120-150k€</span></div><div class="oc-footer"><div class="oc-by">Partagé par Thomas G.</div><button class="oc-btn">Postuler</button></div></div>
+          <div class="offre-card"><div class="oc-top"><div class="oc-logo">🎯</div><div><div class="oc-title">VP Marketing · Cooptation</div><div class="oc-company">Licorne Fintech · Paris · CDI</div></div></div><div class="oc-tags"><span class="tag pill-teal">Marketing</span><span class="tag pill-warn">Dirigeant</span><span class="tag" style="background:#F0FFF4;color:#166534;">Cooptation</span></div><div class="oc-footer"><div class="oc-by">Partagé par Amira C.</div><button class="oc-btn">Postuler</button></div></div>
+          <div class="offre-card"><div class="oc-top"><div class="oc-logo">⚙️</div><div><div class="oc-title">DRH de transition · Freelance</div><div class="oc-company">PME industrielle · Lyon · Mission</div></div></div><div class="oc-tags"><span class="tag pill-teal">RH</span><span class="tag pill-warn">Senior</span><span class="tag" style="background:#EFF6FF;color:#1D4ED8;">Freelance</span></div><div class="oc-footer"><div class="oc-by">Partagé par Sophie M.</div><button class="oc-btn">Postuler</button></div></div>
         </div>
       </div>
+    </div>
 
-      <!-- COMMUNAUTÉ -->
-      <div id="page-community" class="page">
-        <div class="page-header"><h1 class="page-title">Communauté</h1><p class="page-sub">Ton cercle de pairs, les événements et les victoires partagées.</p></div>
-        <button class="victory-input" onclick="postVictory()">🎉 Partage une victoire ou un bon plan avec la communauté…</button>
-        <div class="grid-2" style="margin-bottom:24px;">
-          <div>
-            <h3 style="font-size:13px;font-weight:500;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Mon cercle de pairs</h3>
-            <div class="member-card"><div class="member-ava" style="background:#E1F5EE;color:#085041;">SM</div><div class="member-info"><h4>Sophie M.</h4><p>Ex-DRH · Paris</p></div><span class="member-mood">🙂</span></div>
-            <div class="member-card"><div class="member-ava" style="background:#EEEDFE;color:#3C3489;">PL</div><div class="member-info"><h4>Philippe L.</h4><p>Ex-DAF · Lyon</p></div><span class="member-mood">😊</span></div>
-            <div class="member-card"><div class="member-ava" style="background:#FBEAF0;color:#72243E;">AC</div><div class="member-info"><h4>Amira C.</h4><p>Dir. Marketing · Paris</p></div><span class="member-mood">😐</span></div>
-            <div class="member-card"><div class="member-ava" style="background:#FAEEDA;color:#633806;">TG</div><div class="member-info"><h4>Thomas G.</h4><p>Ex-VP Ops · Paris</p></div><span class="member-mood">🙂</span></div>
-          </div>
-          <div>
-            <h3 style="font-size:13px;font-weight:500;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Événements à venir</h3>
-            <div class="event-card"><div class="event-date-box"><div class="event-day">09</div><div class="event-month">Jun</div></div><div class="event-info"><h4>Café virtuel du cercle</h4><p>12h00 · En ligne · 6 membres</p></div><button class="event-join" onclick="event.stopPropagation();this.textContent='✓ Inscrit·e';this.style.background='var(--success)';this.style.color='#fff';">Rejoindre</button></div>
-            <div class="event-card"><div class="event-date-box"><div class="event-day">11</div><div class="event-month">Jun</div></div><div class="event-info"><h4>Atelier "Négocier son package"</h4><p>18h00 · Philippe L. · 12 places</p></div><button class="event-join" onclick="event.stopPropagation();this.textContent='✓ Inscrit·e';this.style.background='var(--success)';this.style.color='#fff';">S'inscrire</button></div>
-            <div class="event-card"><div class="event-date-box"><div class="event-day">13</div><div class="event-month">Jun</div></div><div class="event-info"><h4>Afterwork réseau virtuel</h4><p>19h00 · Ouvert à tous</p></div><button class="event-join" onclick="event.stopPropagation();this.textContent='✓ Inscrit·e';this.style.background='var(--success)';this.style.color='#fff';">S'inscrire</button></div>
-          </div>
+    <!-- ── COACH IA ── -->
+    <div id="screen-coach" class="screen">
+      <div class="coach-screen">
+        <div class="coach-modes-row">
+          <div class="c-mode active" onclick="setCoachMode(this,'prep')">🎯 Préparation</div>
+          <div class="c-mode" onclick="setCoachMode(this,'moral')">💙 Moral</div>
+          <div class="c-mode" onclick="setCoachMode(this,'cv')">✨ CV & Pitch</div>
+          <div class="c-mode" onclick="setCoachMode(this,'nego')">💰 Négociation</div>
+          <div class="c-mode" onclick="setCoachMode(this,'reseau')">🤝 Réseau</div>
         </div>
-        <h3 style="font-size:13px;font-weight:500;color:var(--ink2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Victoires & bons plans</h3>
-        <div id="victory-feed">
-          <div class="victory-post"><div class="vp-emoji">🎯</div><div class="vp-body"><h4>Sophie M. — Premier entretien chez Michelin décroché !</h4><p>Il y a 9 minutes · Réseau RH</p><div class="vp-reactions"><span class="vp-reaction" onclick="addReaction(this,'👏')">👏 12</span><span class="vp-reaction" onclick="addReaction(this,'🔥')">🔥 5</span><span class="vp-reaction" onclick="addReaction(this,'💪')">💪 8</span></div></div></div>
-          <div class="victory-post"><div class="vp-emoji">📞</div><div class="vp-body"><h4>Thomas G. — 3 entretiens réseau confirmés cette semaine</h4><p>Il y a 3 heures · Ops & Scale-up</p><div class="vp-reactions"><span class="vp-reaction" onclick="addReaction(this,'👏')">👏 7</span><span class="vp-reaction" onclick="addReaction(this,'🚀')">🚀 4</span></div></div></div>
-          <div class="victory-post"><div class="vp-emoji">💡</div><div class="vp-body"><h4>Amira C. — Le DRH de Doctolib cherche une directrice marketing</h4><p>Hier · Prise de contact directe possible</p><div class="vp-reactions"><span class="vp-reaction" onclick="addReaction(this,'🙏')">🙏 15</span><span class="vp-reaction" onclick="addReaction(this,'👀')">👀 9</span></div></div></div>
+        <div class="coach-body" id="coach-body">
+          <div class="cmsg coach"><div class="cmsg-ava" style="background:var(--teal);color:#fff;">A</div><div class="cmsg-bubble">Bonjour ! Je suis Alex, ton coach dédié. Je peux t'aider à préparer tes entretiens, travailler ton pitch, te soutenir moralement ou préparer une négociation. Par quoi on commence ?</div></div>
+        </div>
+        <div class="coach-chips-row">
+          <div class="c-chip" onclick="sendC('Prépare un entretien réseau avec moi.')">Préparer entretien</div>
+          <div class="c-chip" onclick="sendC('Travaille mon pitch de 2 minutes.')">Mon pitch</div>
+          <div class="c-chip" onclick="sendC('J\'ai besoin d\'un boost de motivation.')">Boost moral</div>
+          <div class="c-chip" onclick="sendC('Comment négocier mon salaire ?')">Négocier salaire</div>
+          <div class="c-chip" onclick="sendC('Simule un entretien avec moi.')">Simuler entretien</div>
+        </div>
+        <div class="coach-input-bar">
+          <input class="ci-input" id="coach-inp" placeholder="Écris à Alex…" onkeydown="if(event.key==='Enter')sendCoach()"/>
+          <button class="ci-send" onclick="sendCoach()">➤</button>
         </div>
       </div>
+    </div>
 
-    </main>
-  </div>
+    <!-- ── MESSAGES ── -->
+    <div id="screen-messages" class="screen">
+      <div id="conv-list-view" style="height:100%;">
+        <div style="padding:16px 16px 8px;"><div class="section-title" style="margin-bottom:8px;">Messages</div><input style="width:100%;padding:10px 16px;border:1.5px solid rgba(0,0,0,.1);border-radius:var(--r-full);font-size:14px;outline:none;background:var(--bg3);" placeholder="Rechercher…" oninput="filterConvs(this.value)"/></div>
+        <div class="conv-list" id="conv-list">
+          <div class="conv-item active" onclick="openConv(this,'SM','Sophie M.','DRH · Paris','#E6F7F5','#2A9D8F')"><div class="avatar av-sm" style="background:#E6F7F5;color:#2A9D8F;">SM</div><div class="ci-body"><div class="ci-name">Sophie M.</div><div class="ci-preview">Merci pour les conseils !</div></div><div class="ci-meta"><span class="ci-time">9min</span><div class="ci-unread"></div></div></div>
+          <div class="conv-item" onclick="openConv(this,'PL','Philippe L.','Coach · Lyon','#E8F0FE','#1A73E8')"><div class="avatar av-sm" style="background:#E8F0FE;color:#1A73E8;">PL</div><div class="ci-body"><div class="ci-name">Philippe L.</div><div class="ci-preview">Tu es dispo jeudi ?</div></div><div class="ci-meta"><span class="ci-time">1h</span><div class="ci-unread"></div></div></div>
+          <div class="conv-item" onclick="openConv(this,'AC','Amira C.','Dir. Marketing','#FCE8F0','#C0194A')"><div class="avatar av-sm" style="background:#FCE8F0;color:#C0194A;">AC</div><div class="ci-body"><div class="ci-name">Amira C.</div><div class="ci-preview">Top, à bientôt !</div></div><div class="ci-meta"><span class="ci-time">2h</span></div></div>
+          <div class="conv-item" onclick="openConv(this,'TG','Thomas G.','Ex-VP Ops','#FEF3E2','#C77A1A')"><div class="avatar av-sm" style="background:#FEF3E2;color:#C77A1A;">TG</div><div class="ci-body"><div class="ci-name">Thomas G.</div><div class="ci-preview">J'ai un contact chez Doctolib</div></div><div class="ci-meta"><span class="ci-time">Hier</span></div></div>
+        </div>
+      </div>
+      <div id="chat-view-panel" class="chat-view hidden">
+        <div class="chat-topbar">
+          <span class="chat-back" onclick="closeChat()">‹</span>
+          <div class="avatar av-sm" id="chat-ava-top"></div>
+          <div><div style="font-size:14px;font-weight:700;" id="chat-name-top"></div><div style="font-size:11px;color:var(--ink3);" id="chat-role-top"></div></div>
+        </div>
+        <div class="chat-body" id="chat-body">
+          <div class="chat-msg other"><div class="chat-av" id="chat-ava-msg" style="background:#E6F7F5;color:#2A9D8F;">SM</div><div class="chat-bubble">Bonjour ! Merci pour ton message, ravie d'échanger.</div></div>
+          <div class="chat-msg me"><div class="chat-av" style="background:#E6F7F5;color:var(--teal);">Moi</div><div class="chat-bubble">Super ! Je cherche à comprendre les codes du secteur industriel.</div></div>
+          <div class="chat-msg other"><div class="chat-av" id="chat-ava-msg2" style="background:#E6F7F5;color:#2A9D8F;">SM</div><div class="chat-bubble">Avec plaisir ! Je suis dispo jeudi ou vendredi matin cette semaine.</div></div>
+        </div>
+        <div class="chat-input-bar">
+          <input class="chat-inp" id="chat-inp" placeholder="Ton message…" onkeydown="if(event.key==='Enter')sendChatMsg()"/>
+          <button class="chat-send" onclick="sendChatMsg()">➤</button>
+        </div>
+      </div>
+    </div>
 
-  <!-- BOTTOM NAV (mobile) -->
+    <!-- ── PROFIL ── -->
+    <div id="screen-profil" class="screen">
+      <div class="screen-inner">
+        <div class="profile-hero">
+          <div class="ph-ava" id="ph-ava">?</div>
+          <div class="ph-name" id="ph-name">—</div>
+          <div class="ph-title" id="ph-title">—</div>
+          <div class="completeness">
+            <span style="font-size:12px;color:rgba(255,255,255,.75);font-weight:600;">Profil complété</span>
+            <div class="comp-track"><div class="comp-fill" id="comp-fill" style="width:0%"></div></div>
+            <span class="comp-pct" id="comp-pct">0%</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title" style="font-size:15px;margin-bottom:14px;">Informations</div>
+          <div class="form-group"><label class="form-label">Prénom et nom</label><input class="form-input" id="pf-name" placeholder="Claire Dupont"/></div>
+          <div class="form-group"><label class="form-label">Titre professionnel</label><input class="form-input" id="pf-title" placeholder="Directrice des Opérations · Scale-up"/></div>
+          <div class="form-group"><label class="form-label">Ville</label><input class="form-input" id="pf-city" placeholder="Paris"/></div>
+          <div class="form-group"><label class="form-label">Secteur</label>
+            <select class="form-input" id="pf-sector">
+              <option value="">— Choisir —</option>
+              <option>Direction générale</option><option>Finance & Contrôle</option><option>RH & Talent</option><option>Marketing & Com</option><option>Opérations & Supply</option><option>Tech & Digital</option><option>Commercial & Dév.</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Niveau</label>
+            <select class="form-input" id="pf-level">
+              <option value="">— Choisir —</option>
+              <option value="junior">Junior (0-5 ans)</option><option value="intermediaire">Intermédiaire (5-10 ans)</option><option value="senior">Senior (10-15 ans)</option><option value="dirigeant">Cadre dirigeant (15+ ans)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title" style="font-size:15px;margin-bottom:14px;">Ma recherche</div>
+          <div class="form-group"><label class="form-label">Stade</label>
+            <select class="form-input" id="pf-stage">
+              <option value="">— Choisir —</option>
+              <option>Recherche active</option><option>En veille discrète</option><option>Reconversion</option><option>En poste, je construis</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Poste visé</label><input class="form-input" id="pf-target" placeholder="DAF, DG, VP Finance…"/></div>
+          <div class="form-group"><label class="form-label">Pitch (2-3 phrases)</label><textarea class="form-input" id="pf-pitch" placeholder="Ex : Directrice Ops avec 12 ans en scale-up…"></textarea></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title" style="font-size:15px;margin-bottom:6px;">Disponibilités entretiens réseau</div>
+          <div style="font-size:13px;color:var(--ink3);margin-bottom:12px;">Coche tes créneaux disponibles</div>
+          <div class="avail-grid" id="avail-grid">
+            <div class="avail-slot" onclick="toggleAvail(this)">Lun matin</div>
+            <div class="avail-slot" onclick="toggleAvail(this)">Lun après-midi</div>
+            <div class="avail-slot" onclick="toggleAvail(this)">Mar matin</div>
+            <div class="avail-slot" onclick="toggleAvail(this)">Mar après-midi</div>
+            <div class="avail-slot" onclick="toggleAvail(this)">Mer matin</div>
+            <div class="avail-slot" onclick="toggleAvail(this)">Mer après-midi</div>
+            <div class="avail-slot" onclick="toggleAvail(this)">Jeu matin</div>
+            <div class="avail-slot" onclick="toggleAvail(this)">Jeu après-midi</div>
+            <div class="avail-slot" onclick="toggleAvail(this)">Ven matin</div>
+          </div>
+        </div>
+
+        <button class="btn btn-teal btn-full" onclick="saveProfile()" style="margin-bottom:12px;">Enregistrer le profil</button>
+        <button class="btn btn-ghost btn-full" onclick="doSignOut()">Se déconnecter</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
   <div class="bottom-nav">
-    <div class="bn-inner">
-      <button class="bn-item active" onclick="goPage('dashboard',this)"><span class="bn-icon">🏠</span><span class="bn-label">Accueil</span></button>
-      <button class="bn-item" onclick="goPage('candidatures',this)"><span class="bn-icon">🔍</span><span class="bn-label">Candidatures</span></button>
-      <button class="bn-item" onclick="goPage('matching',this)"><span class="bn-icon">🤝</span><span class="bn-label">Matching</span></button>
-      <button class="bn-item" onclick="goPage('coach',this)"><span class="bn-icon">🧠</span><span class="bn-label">Coach</span></button>
-      <button class="bn-item" onclick="goPage('community',this)"><span class="bn-icon">👥</span><span class="bn-label">Communauté</span></button>
-    </div>
+    <button class="bn-item active" onclick="goScreen('accueil',this)"><span class="bn-icon">🏠</span><span class="bn-label">Accueil</span></button>
+    <button class="bn-item" onclick="goScreen('candidatures',this)"><span class="bn-icon bn-badge">🔍</span><span class="bn-label">Suivi</span></button>
+    <button class="bn-item" onclick="goScreen('matching',this)"><span class="bn-icon">🤝</span><span class="bn-label">Matching</span></button>
+    <button class="bn-item" onclick="goScreen('communautes',this)"><span class="bn-icon">👥</span><span class="bn-label">Communautés</span></button>
+    <button class="bn-item" onclick="goScreen('offres',this)"><span class="bn-icon">💼</span><span class="bn-label">Offres</span></button>
   </div>
 
 </div><!-- /app -->
 
+<!-- MODALS -->
+<div id="modal-overlay" class="modal-overlay hidden" onclick="closeModal(event)">
+  <div class="modal-sheet" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<div class="save-toast" id="save-toast">✅ Enregistré !</div>
 
 <!-- ═══ FIREBASE ═══ -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey:"AIzaSyCgAS2_hOgHlQNrFW25StgZ6Je0QcwTY-g",
-    authDomain:"resilink-rh.firebaseapp.com",
-    projectId:"resilink-rh",
-    storageBucket:"resilink-rh.firebasestorage.app",
-    messagingSenderId:"771333810630",
-    appId:"1:771333810630:web:7795c8bef2e9cedc652ac7"
-  };
-
-  const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getFirestore(app);
+  const cfg={apiKey:"AIzaSyCgAS2_hOgHlQNrFW25StgZ6Je0QcwTY-g",authDomain:"resilink-rh.firebaseapp.com",projectId:"resilink-rh",storageBucket:"resilink-rh.firebasestorage.app",messagingSenderId:"771333810630",appId:"1:771333810630:web:7795c8bef2e9cedc652ac7"};
+  const app=initializeApp(cfg), auth=getAuth(app), db=getFirestore(app);
   let uid=null, unsubCands=null;
 
-  onAuthStateChanged(auth, async user => {
-    if (!user) { window.location.href='index.html'; return; }
+  onAuthStateChanged(auth, async user=>{
+    if(!user){window.location.href='index.html';return;}
     uid=user.uid; window._uid=uid;
-
-    // Charger profil
-    const ref=doc(db,'users',uid);
-    const snap=await getDoc(ref);
-    const data=snap.exists()?snap.data():{};
     const name=user.displayName||user.email.split('@')[0];
     const initials=name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-
-    document.getElementById('user-ava').textContent=initials;
-    document.getElementById('user-name').textContent=name.split(' ')[0];
-    document.getElementById('greeting').textContent='Bonjour, '+name.split(' ')[0]+' 👋';
-    const d=new Date(); document.getElementById('dateline').textContent=d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-
-    // Profil page
-    document.getElementById('profile-ava-big').textContent=initials;
-    document.getElementById('profile-fullname').textContent=name;
-    document.getElementById('profile-email-display').textContent=user.email;
-    if(data.title) document.getElementById('pf-title').value=data.title;
-    if(data.city) document.getElementById('pf-city').value=data.city;
-    if(data.sector) document.getElementById('pf-sector').value=data.sector;
-    if(data.stage) document.getElementById('pf-stage').value=data.stage;
-    if(data.target) document.getElementById('pf-target').value=data.target;
-    if(data.available) document.getElementById('pf-available').value=data.available;
-    if(data.pitch) document.getElementById('pf-pitch').value=data.pitch;
+    document.getElementById('user-btn').textContent=initials;
+    document.getElementById('gc-name').textContent=name.split(' ')[0];
+    document.getElementById('gc-date').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+    document.getElementById('ph-ava').textContent=initials;
     document.getElementById('pf-name').value=name;
-    updateCompleteness(data);
+    document.getElementById('ph-name').textContent=name;
 
-    // Candidatures
-    unsubCands=onSnapshot(collection(db,'users',uid,'candidatures'), snap => {
+    const snap=await getDoc(doc(db,'users',uid));
+    if(snap.exists()){
+      const d=snap.data();
+      if(d.title){document.getElementById('pf-title').value=d.title;document.getElementById('ph-title').textContent=d.title;}
+      if(d.city) document.getElementById('pf-city').value=d.city;
+      if(d.sector) document.getElementById('pf-sector').value=d.sector;
+      if(d.level) document.getElementById('pf-level').value=d.level;
+      if(d.stage) document.getElementById('pf-stage').value=d.stage;
+      if(d.target) document.getElementById('pf-target').value=d.target;
+      if(d.pitch) document.getElementById('pf-pitch').value=d.pitch;
+      updateComp(d);
+    }
+
+    unsubCands=onSnapshot(collection(db,'users',uid,'candidatures'),snap=>{
       const cands=snap.docs.map(d=>({id:d.id,...d.data()}));
-      window._cands=cands;
-      renderKanban(cands); updateStats(cands);
+      window._cands=cands; renderKanban(cands); updateStats(cands); renderCal();
     });
 
-    document.getElementById('auth-gate').style.display='none';
+    document.getElementById('gate').style.display='none';
     document.getElementById('app').style.display='flex';
   });
 
-  function updateCompleteness(data) {
-    const fields=['title','city','sector','stage','target','pitch','available'];
-    const filled=fields.filter(f=>data[f]&&data[f].trim()).length;
-    const pct=Math.round((filled/fields.length)*100);
-    document.getElementById('complete-pct').textContent=pct+'%';
-    document.getElementById('complete-bar-fill').style.width=pct+'%';
+  function updateComp(d){
+    const fields=['title','city','sector','level','stage','target','pitch'];
+    const n=fields.filter(f=>d[f]&&d[f].trim()).length;
+    const p=Math.round(n/fields.length*100);
+    document.getElementById('comp-fill').style.width=p+'%';
+    document.getElementById('comp-pct').textContent=p+'%';
   }
 
   window.saveProfile=async()=>{
-    if(!uid) return;
-    const data={
+    if(!uid)return;
+    const d={
       displayName:document.getElementById('pf-name').value.trim(),
       title:document.getElementById('pf-title').value.trim(),
       city:document.getElementById('pf-city').value.trim(),
       sector:document.getElementById('pf-sector').value,
+      level:document.getElementById('pf-level').value,
       stage:document.getElementById('pf-stage').value,
       target:document.getElementById('pf-target').value.trim(),
-      available:document.getElementById('pf-available').value,
       pitch:document.getElementById('pf-pitch').value.trim(),
+      availability:Array.from(document.querySelectorAll('.avail-slot.sel')).map(s=>s.textContent),
       updatedAt:serverTimestamp()
     };
-    await setDoc(doc(db,'users',uid),data,{merge:true});
-    updateCompleteness(data);
-    const c=document.getElementById('save-confirm');
-    c.classList.remove('hidden'); setTimeout(()=>c.classList.add('hidden'),3000);
+    await setDoc(doc(db,'users',uid),d,{merge:true});
+    document.getElementById('ph-name').textContent=d.displayName||'—';
+    document.getElementById('ph-title').textContent=d.title||'—';
+    updateComp(d);
+    showToast();
   };
 
-  window._addCand=async(data)=>{ if(uid) await addDoc(collection(db,'users',uid,'candidatures'),{...data,createdAt:serverTimestamp()}); };
+  window._addCand=async data=>{
+    if(uid) await addDoc(collection(db,'users',uid,'candidatures'),{...data,createdAt:serverTimestamp()});
+  };
 
-  window.doSignOut=async()=>{ if(unsubCands) unsubCands(); await signOut(auth); window.location.href='index.html'; };
+  window.doSignOut=async()=>{if(unsubCands)unsubCands();await signOut(auth);window.location.href='index.html';};
 </script>
 
 <!-- ═══ APP LOGIC ═══ -->
 <script>
   // ── Navigation ──
-  function goPage(id, el) {
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.querySelectorAll('.sn-item').forEach(s=>s.classList.remove('active'));
+  function goScreen(id, el){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
     document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
-    document.getElementById('page-'+id).classList.add('active');
+    document.getElementById('screen-'+id).classList.add('active');
     if(el) el.classList.add('active');
-    document.getElementById('notif-panel').classList.add('hidden');
-    if(id==='matching') renderMatchCard();
-    window.scrollTo(0,0);
+    else {
+      const map={accueil:0,candidatures:1,matching:2,communautes:3,offres:4};
+      const idx=map[id]; if(idx!==undefined) document.querySelectorAll('.bn-item')[idx]?.classList.add('active');
+    }
+    closeNotifs();
+    if(id==='matching') renderSwipeCard();
+    if(id==='communautes') renderComms();
   }
-  function goProfile() { goPage('profile'); }
 
   // ── Notifs ──
-  function toggleNotifs() { document.getElementById('notif-panel').classList.toggle('hidden'); }
-  function clearNotifs() {
-    document.querySelectorAll('.notif-dot').forEach(d=>d.style.opacity='0');
-    document.querySelectorAll('.notif-item').forEach(i=>i.classList.remove('unread'));
-    document.getElementById('notif-badge').style.display='none';
-  }
-  document.addEventListener('click',e=>{ if(!e.target.closest('#notif-panel')&&!e.target.closest('.notif-btn')) document.getElementById('notif-panel')?.classList.add('hidden'); });
+  function toggleNotifs(){document.getElementById('notif-panel').classList.toggle('hidden');}
+  function closeNotifs(){document.getElementById('notif-panel').classList.add('hidden');}
+  function clearNotifs(){document.querySelectorAll('.np-dot').forEach(d=>d.style.opacity='0');document.querySelectorAll('.np-item').forEach(i=>i.classList.remove('unread'));document.getElementById('notif-dot').style.display='none';}
+  document.addEventListener('click',e=>{if(!e.target.closest('#notif-panel')&&!e.target.closest('.icon-btn'))closeNotifs();});
 
   // ── Mood ──
-  function pickMood(el) { document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); }
+  function pickMood(el){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
+
+  // ── Toast ──
+  function showToast(){const t=document.getElementById('save-toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
   // ── Stats ──
-  function updateStats(cands) {
-    const total=cands.length, entretien=cands.filter(c=>c.status==='entretien').length;
-    const offre=cands.filter(c=>c.status==='offre').length;
-    const now=Date.now(), relance=cands.filter(c=>{
-      if(c.status==='refus'||c.status==='offre') return false;
-      if(!c.createdAt) return false;
-      const ts=c.createdAt.toDate?c.createdAt.toDate().getTime():0;
-      return (now-ts)>7*24*3600*1000;
+  function updateStats(cands){
+    const now=Date.now();
+    const relance=cands.filter(c=>{
+      if(['refus','offre'].includes(c.status))return false;
+      const ts=c.createdAt?.toDate?.().getTime()||0;
+      return (now-ts)>7*86400000;
     }).length;
-    document.getElementById('st-cand').textContent=total;
-    document.getElementById('st-entretien').textContent=entretien;
-    document.getElementById('st-relance').textContent=relance;
-    document.getElementById('st-offre').textContent=offre;
-    const ra=document.getElementById('relance-alert');
-    if(relance>0){ ra.classList.remove('hidden'); document.getElementById('relance-count').textContent=relance; document.getElementById('badge-relance').style.display=''; }
-    else { ra.classList.add('hidden'); document.getElementById('badge-relance').style.display='none'; }
+    document.getElementById('st-c').textContent=cands.length;
+    document.getElementById('st-e').textContent=cands.filter(c=>c.status==='entretien').length;
+    document.getElementById('st-r').textContent=relance;
+    document.getElementById('st-o').textContent=cands.filter(c=>c.status==='offre').length;
+    const rb=document.getElementById('relance-banner');
+    if(relance>0){rb.classList.remove('hidden');document.getElementById('relance-n').textContent=relance;}
+    else rb.classList.add('hidden');
   }
 
-  // ── Kanban ──
-  const COLS=[
-    {id:'envoyee',label:'Envoyée',color:'#B5D4F4'},
-    {id:'attente',label:'En attente',color:'#FAC775'},
-    {id:'entretien',label:'Entretien',color:'#9FE1CB'},
-    {id:'offre',label:'Offre',color:'#AFA9EC'},
-    {id:'refus',label:'Refus',color:'#F09595'},
-  ];
+  // ── CALENDRIER ──
+  let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+  const CAL_MONTHS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const CAL_DAYS=['L','M','M','J','V','S','D'];
+  let selectedDay=null;
 
-  function renderKanban(cands) {
+  function renderCal(){
+    const grid=document.getElementById('cal-grid');
+    const title=document.getElementById('cal-month');
+    title.textContent=CAL_MONTHS[calMonth]+' '+calYear;
+    grid.innerHTML=CAL_DAYS.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+    const first=new Date(calYear,calMonth,1).getDay();
+    const offset=(first===0?6:first-1);
+    const days=new Date(calYear,calMonth+1,0).getDate();
+    const today=new Date();
+    const events=getCalEvents();
+    for(let i=0;i<offset;i++) grid.innerHTML+=`<div class="cal-day empty"></div>`;
+    for(let d=1;d<=days;d++){
+      const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+      const key=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const hasEv=events.some(e=>e.date===key);
+      const isSel=selectedDay===key;
+      grid.innerHTML+=`<div class="cal-day${isToday?' today':''}${hasEv?' has-event':''}${isSel?' selected':''}" onclick="selectDay('${key}')">${d}</div>`;
+    }
+    renderCalEvents();
+  }
+
+  function getCalEvents(){
+    const cands=window._cands||[];
+    const evs=[];
+    cands.forEach(c=>{
+      if(c.entretienDate) evs.push({date:c.entretienDate,title:'Entretien · '+c.company,color:'#2A9D8F',type:'entretien'});
+      if(c.relanceDate) evs.push({date:c.relanceDate,title:'Relancer · '+c.company,color:'#F4A261',type:'relance'});
+    });
+    // Événements communauté
+    evs.push({date:'2026-06-09',title:'Café virtuel du cercle · 12h',color:'#2A9D8F',type:'event'});
+    evs.push({date:'2026-06-11',title:'Atelier Négociation · 18h',color:'#7C3AED',type:'event'});
+    evs.push({date:'2026-06-13',title:'Afterwork réseau · 19h',color:'#E63946',type:'event'});
+    return evs;
+  }
+
+  function selectDay(key){
+    selectedDay=selectedDay===key?null:key;
+    renderCal();
+  }
+
+  function renderCalEvents(){
+    const cont=document.getElementById('cal-events');
+    const evs=getCalEvents();
+    const toShow=selectedDay?evs.filter(e=>e.date===selectedDay):evs.filter(e=>{
+      const d=new Date(e.date), n=new Date();
+      return d>=new Date(n.getFullYear(),n.getMonth(),n.getDate()) && d<=new Date(n.getFullYear(),n.getMonth(),n.getDate()+7);
+    });
+    if(toShow.length===0){cont.innerHTML='<div style="font-size:12px;color:var(--ink3);text-align:center;padding:8px;">Aucun événement</div>';return;}
+    cont.innerHTML=toShow.map(e=>`<div class="cal-event-item"><div class="cei-dot" style="background:${e.color};"></div><div><div class="cei-title">${e.title}</div><div class="cei-time">${formatDate(e.date)}</div></div></div>`).join('');
+  }
+
+  function formatDate(str){const d=new Date(str);return d.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});}
+  function calNav(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCal();}
+
+  // ── KANBAN ──
+  const KCOLS=[
+    {id:'envoyee',label:'Envoyée',color:'#DBEAFE'},
+    {id:'attente',label:'En attente',color:'#FEF3E2'},
+    {id:'entretien',label:'Entretien',color:'#D1FAE5'},
+    {id:'offre',label:'Offre',color:'#EDE9FE'},
+    {id:'refus',label:'Refus',color:'#FEE2E2'},
+  ];
+  let dragCard=null, dragStatus=null;
+
+  function renderKanban(cands){
     const board=document.getElementById('kanban');
     board.innerHTML='';
-    COLS.forEach(col=>{
+    KCOLS.forEach(col=>{
       const cards=cands.filter(c=>c.status===col.id);
+      const colEl=document.createElement('div'); colEl.className='k-col';
+      colEl.dataset.status=col.id;
+      colEl.addEventListener('dragover',e=>{e.preventDefault();colEl.classList.add('drag-target');});
+      colEl.addEventListener('dragleave',()=>colEl.classList.remove('drag-target'));
+      colEl.addEventListener('drop',e=>{e.preventDefault();colEl.classList.remove('drag-target');if(dragCard&&dragStatus!==col.id)dropCard(dragCard,col.id);});
+      colEl.innerHTML=`<div class="k-col-head"><span class="k-col-title">${col.label}</span><span class="k-col-count">${cards.length}</span></div>`;
       const now=Date.now();
-      const el=document.createElement('div'); el.className='k-col';
-      el.innerHTML=`<div class="k-head"><span class="k-title">${col.label}</span><span class="k-count">${cards.length}</span></div><div class="k-cards" id="cards-${col.id}"></div>`;
-      board.appendChild(el);
-      const cardsCont=el.querySelector('.k-cards');
       cards.forEach(c=>{
-        const days=c.createdAt?.toDate?(now-c.createdAt.toDate().getTime())/(86400000):0;
-        const needsRelance=days>7&&col.id!=='refus'&&col.id!=='offre';
-        const card=document.createElement('div'); card.className='k-card';
-        card.innerHTML=`<div class="kc-co">${c.company||'—'}</div><div class="kc-role">${c.role||''}</div><div class="kc-date">${c.date||''}</div>${needsRelance?`<div class="kc-relance urgent">⚠ Relancer</div>`:`<div class="kc-relance ok">✓ OK</div>`}${c.notes?`<div style="font-size:11px;color:var(--ink3);margin-top:4px;">${c.notes.substring(0,50)}${c.notes.length>50?'…':''}</div>`:''}`;
-        cardsCont.appendChild(card);
+        const days=c.createdAt?.toDate?(now-c.createdAt.toDate().getTime())/86400000:0;
+        const urgent=days>7&&!['refus','offre'].includes(col.id);
+        const card=document.createElement('div'); card.className='k-card'; card.draggable=true;
+        card.dataset.id=c.id; card.dataset.status=col.id;
+        card.innerHTML=`<div class="kc-co">${c.company||'—'}</div><div class="kc-role">${c.role||''}</div><div class="kc-date">${c.date||''}</div><div class="kc-relance ${urgent?'urgent':'ok'}">${urgent?'⚠ Relancer':'✓ OK'}</div>`;
+        card.addEventListener('dragstart',()=>{dragCard=c.id;dragStatus=col.id;card.classList.add('dragging');});
+        card.addEventListener('dragend',()=>{card.classList.remove('dragging');dragCard=null;dragStatus=null;});
+        card.addEventListener('click',()=>openCardModal(c));
+        colEl.appendChild(card);
       });
-      const addBtn=document.createElement('button'); addBtn.className='add-btn'; addBtn.textContent='+ Ajouter';
-      addBtn.onclick=()=>quickAdd(col.id);
-      el.appendChild(addBtn);
+      const addBtn=document.createElement('button'); addBtn.className='k-add-btn'; addBtn.textContent='+ Ajouter';
+      addBtn.onclick=()=>showAddModal(col.id);
+      colEl.appendChild(addBtn);
+      board.appendChild(colEl);
     });
   }
 
-  function showAddCandidature() {
-    const f=document.getElementById('add-cand-form');
-    f.classList.toggle('hidden');
-    document.getElementById('nc-date').value=new Date().toISOString().split('T')[0];
-  }
-  function cancelCandidature() { document.getElementById('add-cand-form').classList.add('hidden'); }
-  function saveCandidature() {
-    const company=document.getElementById('nc-company').value.trim();
-    const role=document.getElementById('nc-role').value.trim();
-    if(!company||!role) return;
-    window._addCand?.({ company, role, date:document.getElementById('nc-date').value, status:document.getElementById('nc-status').value, notes:document.getElementById('nc-notes').value.trim() });
-    document.getElementById('add-cand-form').classList.add('hidden');
-    ['nc-company','nc-role','nc-notes'].forEach(id=>document.getElementById(id).value='');
-  }
-  function quickAdd(status) {
-    const company=prompt('Entreprise :'); if(!company) return;
-    const role=prompt('Poste visé :'); if(!role) return;
-    window._addCand?.({ company, role, date:new Date().toISOString().split('T')[0], status, notes:'' });
+  function dropCard(cardId,newStatus){
+    const cands=window._cands||[];
+    const c=cands.find(x=>x.id===cardId);
+    if(!c||!window._uid)return;
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({getFirestore,doc,updateDoc})=>{
+      const db=getFirestore(); updateDoc(doc(db,'users',window._uid,'candidatures',cardId),{status:newStatus});
+    });
   }
 
-  // ── Matching ──
+  function openCardModal(c){
+    document.getElementById('modal-content').innerHTML=`
+      <div class="modal-title">${c.company||'Candidature'}</div>
+      <div style="font-size:14px;color:var(--ink2);margin-bottom:16px;">${c.role||''}</div>
+      <div class="form-group"><label class="form-label">Date de relance</label><input type="date" class="form-input" id="m-relance" value="${c.relanceDate||''}"/></div>
+      <div class="form-group"><label class="form-label">Date d'entretien</label><input type="date" class="form-input" id="m-entretien" value="${c.entretienDate||''}"/></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="m-notes">${c.notes||''}</textarea></div>
+      <button class="btn btn-teal btn-full" onclick="saveCardDates('${c.id}')">Enregistrer</button>`;
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  }
+
+  function saveCardDates(id){
+    const relanceDate=document.getElementById('m-relance').value;
+    const entretienDate=document.getElementById('m-entretien').value;
+    const notes=document.getElementById('m-notes').value;
+    import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js").then(({getFirestore,doc,updateDoc})=>{
+      updateDoc(doc(getFirestore(),'users',window._uid,'candidatures',id),{relanceDate,entretienDate,notes});
+    });
+    closeModal(); showToast(); renderCal();
+  }
+
+  // ── Modal ──
+  function showAddModal(defaultStatus='envoyee'){
+    document.getElementById('modal-content').innerHTML=`
+      <div class="modal-title">Nouvelle candidature</div>
+      <div class="form-group"><label class="form-label">Entreprise *</label><input class="form-input" id="nc-co" placeholder="Nom de l'entreprise"/></div>
+      <div class="form-group"><label class="form-label">Poste *</label><input class="form-input" id="nc-role" placeholder="Titre du poste"/></div>
+      <div class="form-group"><label class="form-label">Date d'envoi</label><input type="date" class="form-input" id="nc-date" value="${new Date().toISOString().split('T')[0]}"/></div>
+      <div class="form-group"><label class="form-label">Statut</label>
+        <select class="form-input" id="nc-status">
+          ${KCOLS.map(c=>`<option value="${c.id}"${c.id===defaultStatus?' selected':''}>${c.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Date de relance</label><input type="date" class="form-input" id="nc-relance"/></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="nc-notes" placeholder="Contact, source…"></textarea></div>
+      <button class="btn btn-teal btn-full" onclick="saveCand()">Ajouter</button>`;
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  }
+
+  function saveCand(){
+    const co=document.getElementById('nc-co').value.trim(), role=document.getElementById('nc-role').value.trim();
+    if(!co||!role)return;
+    window._addCand?.({company:co,role,date:document.getElementById('nc-date').value,status:document.getElementById('nc-status').value,relanceDate:document.getElementById('nc-relance').value,notes:document.getElementById('nc-notes').value.trim()});
+    closeModal(); showToast();
+  }
+
+  function showOffreModal(){
+    document.getElementById('modal-content').innerHTML=`
+      <div class="modal-title">Déposer une offre</div>
+      <div class="form-group"><label class="form-label">Titre du poste *</label><input class="form-input" id="of-title" placeholder="VP Marketing, DAF…"/></div>
+      <div class="form-group"><label class="form-label">Entreprise *</label><input class="form-input" id="of-co" placeholder="Nom de l'entreprise"/></div>
+      <div class="form-group"><label class="form-label">Type</label>
+        <select class="form-input" id="of-type"><option>CDI</option><option>Freelance</option><option>Cooptation</option><option>Conseil</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Localisation</label><input class="form-input" id="of-loc" placeholder="Paris, Lyon, Remote…"/></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" id="of-desc" placeholder="Détails du poste…"></textarea></div>
+      <button class="btn btn-teal btn-full" onclick="saveOffre()">Publier l'offre</button>`;
+    document.getElementById('modal-overlay').classList.remove('hidden');
+  }
+
+  function saveOffre(){
+    const title=document.getElementById('of-title').value.trim(), co=document.getElementById('of-co').value.trim();
+    if(!title||!co)return;
+    const list=document.getElementById('offres-list');
+    const div=document.createElement('div'); div.className='offre-card';
+    div.innerHTML=`<div class="oc-top"><div class="oc-logo">🆕</div><div><div class="oc-title">${title}</div><div class="oc-company">${co} · ${document.getElementById('of-loc').value||'—'} · ${document.getElementById('of-type').value}</div></div></div><div class="oc-tags"><span class="tag pill-teal">${document.getElementById('of-type').value}</span></div><div class="oc-footer"><div class="oc-by">Partagé par toi · À l'instant</div><button class="oc-btn">Postuler</button></div>`;
+    list.prepend(div); closeModal(); showToast();
+  }
+
+  function closeModal(e){
+    if(!e||e.target===document.getElementById('modal-overlay')) document.getElementById('modal-overlay').classList.add('hidden');
+  }
+
+  // ── MATCHING ──
   const PROFILES=[
-    {init:'SM',bg:'#EEEDFE',col:'#3C3489',name:'Sophie M.',role:'DRH · Groupe industriel · Paris',tags:[{t:'Industrie',bg:'#EEEDFE',c:'#3C3489'},{t:'Réseau',bg:'#E1F5EE',c:'#085041'}],bio:'"J\'ai traversé 2 transitions. Disponible pour partager mon vécu sur les fonctions RH dans l\'industrie."',match:82,avail:'Disponible cette semaine · ~30 min'},
-    {init:'PL',bg:'#E1F5EE',col:'#085041',name:'Philippe L.',role:'Coach certifié · Ex-DAF · Lyon',tags:[{t:'Finance',bg:'#FAEEDA',c:'#633806'},{t:'Coach',bg:'#EEEDFE',c:'#3C3489'}],bio:'"Ancien DAF reconverti coach. J\'accompagne les cadres financiers vers des rôles plus stratégiques."',match:76,avail:'3 créneaux libres · 45 min'},
-    {init:'AC',bg:'#FBEAF0',col:'#72243E',name:'Amira C.',role:'Dir. Marketing · SaaS · Remote',tags:[{t:'Tech/SaaS',bg:'#E6F1FB',c:'#0C447C'},{t:'Pair',bg:'#FBEAF0',c:'#72243E'}],bio:'"En recherche depuis 3 mois. J\'échange sur les codes du marketing dans le secteur tech."',match:91,avail:'Ce soir · 20 min'},
-    {init:'TG',bg:'#FAEEDA',col:'#633806',name:'Thomas G.',role:'Ex-VP Ops · Scale-up · Paris',tags:[{t:'Scale-up',bg:'#E1F5EE',c:'#085041'},{t:'Réseau',bg:'#E1F5EE',c:'#085041'}],bio:'"J\'ai monté les opérations de 3 à 200 personnes. Ravi d\'échanger avec des cadres ops."',match:68,avail:'Semaine prochaine · 30 min'},
+    {init:'SM',bg:'#E6F7F5',col:'#2A9D8F',name:'Sophie M.',role:'DRH · Groupe industriel · Paris',tags:[{t:'Industrie',bg:'#E6F7F5',c:'#2A9D8F'},{t:'Réseau',bg:'#E8F0FE',c:'#1A73E8'}],bio:'"J\'ai traversé 2 transitions. Disponible pour partager mon vécu RH dans l\'industrie lourde."',score:82,avail:'Disponible cette semaine · ~30 min'},
+    {init:'PL',bg:'#E8F0FE',col:'#1A73E8',name:'Philippe L.',role:'Coach certifié · Ex-DAF · Lyon',tags:[{t:'Finance',bg:'#FEF3E2',c:'#C77A1A'},{t:'Coach',bg:'#E6F7F5',c:'#2A9D8F'}],bio:'"Ancien DAF reconverti coach. J\'accompagne les cadres financiers vers des rôles plus stratégiques."',score:76,avail:'3 créneaux libres · 45 min'},
+    {init:'AC',bg:'#FCE8F0',col:'#C0194A',name:'Amira C.',role:'Dir. Marketing · SaaS · Remote',tags:[{t:'Tech/SaaS',bg:'#EFF6FF',c:'#1D4ED8'},{t:'Pair',bg:'#FCE8F0',c:'#C0194A'}],bio:'"En recherche depuis 3 mois. J\'échange sur les codes du marketing tech."',score:91,avail:'Ce soir · 20 min'},
+    {init:'TG',bg:'#FEF3E2',col:'#C77A1A',name:'Thomas G.',role:'Ex-VP Ops · Scale-up · Paris',tags:[{t:'Scale-up',bg:'#E6F7F5',c:'#2A9D8F'},{t:'Réseau',bg:'#E6F7F5',c:'#2A9D8F'}],bio:'"J\'ai monté les opérations de 3 à 200 personnes. Ravi d\'échanger avec des cadres ops."',score:68,avail:'Semaine prochaine · 30 min'},
   ];
   let mIdx=0;
-  function renderMatchCard() {
+  function renderSwipeCard(){
     const p=PROFILES[mIdx%PROFILES.length];
-    document.getElementById('pc-ava').style.background=p.bg; document.getElementById('pc-ava').style.color=p.col; document.getElementById('pc-ava').textContent=p.init;
-    document.getElementById('pc-name').textContent=p.name; document.getElementById('pc-role').textContent=p.role;
-    document.getElementById('pc-bio').textContent=p.bio; document.getElementById('pc-avail').textContent=p.avail;
-    document.getElementById('ms-fill').style.width=p.match+'%'; document.getElementById('ms-pct').textContent=p.match+'%';
-    document.getElementById('pc-tags').innerHTML=p.tags.map(t=>`<span class="pc-tag" style="background:${t.bg};color:${t.c};">${t.t}</span>`).join('');
-    document.getElementById('match-fb').textContent='';
+    const ava=document.getElementById('psc-ava');
+    ava.style.background=p.bg; ava.style.color=p.col; ava.textContent=p.init;
+    document.getElementById('psc-name').textContent=p.name;
+    document.getElementById('psc-role').textContent=p.role;
+    document.getElementById('psc-bio').textContent=p.bio;
+    document.getElementById('psc-avail').textContent=p.avail;
+    document.getElementById('score-fill').style.width=p.score+'%';
+    document.getElementById('score-pct').textContent=p.score+'%';
+    document.getElementById('psc-tags').innerHTML=p.tags.map(t=>`<span class="tag" style="background:${t.bg};color:${t.c};">${t.t}</span>`).join('');
+    document.getElementById('swipe-fb').textContent='';
   }
-  function setMType(el) { document.querySelectorAll('.match-pill').forEach(p=>p.classList.remove('active')); el.classList.add('active'); mIdx=0; renderMatchCard(); }
-  function mPass() { document.getElementById('match-fb').textContent='Profil passé — on cherche mieux !'; mIdx++; setTimeout(renderMatchCard,800); }
-  function mConnect() { const n=PROFILES[mIdx%PROFILES.length].name; document.getElementById('match-fb').textContent='Demande envoyée à '+n+' !'; mIdx++; setTimeout(renderMatchCard,1000); }
-  function mMsg() { goPage('messages'); }
+  function setMType(el){document.querySelectorAll('.mt-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');mIdx=0;renderSwipeCard();}
+  function sPass(){document.getElementById('swipe-fb').textContent='Passé — on cherche mieux !';mIdx++;setTimeout(renderSwipeCard,800);}
+  function sConnect(){const n=PROFILES[mIdx%PROFILES.length].name;document.getElementById('swipe-fb').textContent='Demande envoyée à '+n+' ! 🎉';mIdx++;setTimeout(renderSwipeCard,1200);}
 
-  // ── Coach IA ──
+  // ── COMMUNAUTÉS ──
+  const COMMS=[
+    {id:'c1',sector:'finance',level:'senior',name:'Finance Senior',icon:'💰',bg:'#FEF3E2',desc:'DAF, CFO, Directeurs financiers · 10-15 ans',members:24,color:'#C77A1A'},
+    {id:'c2',sector:'rh',level:'dirigeant',name:'DRH & C-Suite RH',icon:'👔',bg:'#F3E8FF',desc:'Cadres dirigeants RH · 15+ ans',members:18,color:'#7C3AED'},
+    {id:'c3',sector:'marketing',level:'senior',name:'Marketing Senior',icon:'🎯',bg:'#FCE8F0',desc:'Directeurs Marketing · Scale-up & Grands groupes',members:31,color:'#C0194A'},
+    {id:'c4',sector:'ops',level:'intermediaire',name:'Opérations Intermédiaire',icon:'⚙️',bg:'#E6F7F5',desc:'Managers Ops · 5-10 ans d\'expérience',members:22,color:'#2A9D8F'},
+    {id:'c5',sector:'tech',level:'senior',name:'Tech & Digital Senior',icon:'💻',bg:'#E8F0FE',desc:'CTO, VP Tech, Directeurs digitaux',members:29,color:'#1A73E8'},
+    {id:'c6',sector:'dg',level:'dirigeant',name:'Direction Générale',icon:'🏢',bg:'#F0FFF4',desc:'DG, CEO, COO · Tous secteurs',members:15,color:'#166534'},
+    {id:'c7',sector:'finance',level:'junior',name:'Finance Junior',icon:'📊',bg:'#FEF3E2',desc:'Contrôleurs, Analystes · 0-5 ans',members:38,color:'#C77A1A'},
+    {id:'c8',sector:'rh',level:'intermediaire',name:'RH Intermédiaire',icon:'🤝',bg:'#F3E8FF',desc:'RRH, HRBP · 5-10 ans',members:27,color:'#7C3AED'},
+  ];
+  let commSector='all', commLevel='all';
+  let joinedComms=new Set();
+
+  function filterComm(el,sector){
+    document.querySelectorAll('#sector-filters .filter-chip').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active'); commSector=sector; renderComms();
+  }
+  function filterLevel(el,level){
+    document.querySelectorAll('#level-filters .filter-chip').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active'); commLevel=level; renderComms();
+  }
+  function renderComms(){
+    const filtered=COMMS.filter(c=>(commSector==='all'||c.sector===commSector)&&(commLevel==='all'||c.level===commLevel));
+    const levelLabels={junior:'Junior',intermediaire:'Intermédiaire',senior:'Senior',dirigeant:'Dirigeant'};
+    const levelColors={junior:'#E8F0FE',intermediaire:'#E6F7F5',senior:'#FEF3E2',dirigeant:'#F3E8FF'};
+    document.getElementById('comm-grid').innerHTML=filtered.map(c=>`
+      <div class="community-card" onclick="openComm('${c.id}')">
+        <div class="comm-head">
+          <div class="comm-icon" style="background:${c.bg};">${c.icon}</div>
+          <div><div class="comm-name">${c.name}</div><div class="comm-desc">${c.desc}</div></div>
+        </div>
+        <div class="comm-footer">
+          <div class="comm-members-row">
+            <div class="comm-av" style="background:${c.bg};color:${c.color};">A</div>
+            <div class="comm-av" style="background:${c.bg};color:${c.color};">B</div>
+            <div class="comm-av" style="background:${c.bg};color:${c.color};">C</div>
+            <span class="comm-count">+${c.members} membres</span>
+          </div>
+          <span class="comm-level" style="background:${levelColors[c.level]||'#E6F7F5'};color:var(--ink2);">${levelLabels[c.level]||c.level}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function openComm(id){
+    const c=COMMS.find(x=>x.id===id); if(!c) return;
+    const joined=joinedComms.has(id);
+    const members=[
+      {init:'SM',name:'Sophie M.',role:'DRH · Paris',bg:'#E6F7F5',col:'#2A9D8F',avail:true,tags:['Réseau','Entretien']},
+      {init:'PL',name:'Philippe L.',role:'Coach · Lyon',bg:'#E8F0FE',col:'#1A73E8',avail:true,tags:['Coach','Finance']},
+      {init:'AC',name:'Amira C.',role:'Dir. Marketing',bg:'#FCE8F0',col:'#C0194A',avail:false,tags:['Pair']},
+      {init:'TG',name:'Thomas G.',role:'Ex-VP Ops',bg:'#FEF3E2',col:'#C77A1A',avail:true,tags:['Réseau','Ops']},
+    ];
+    const detail=document.getElementById('comm-detail-view');
+    detail.innerHTML=`
+      <div class="comm-detail-header">
+        <div class="cdh-back" onclick="closeComm()">‹ Retour</div>
+        <div style="font-size:32px;margin-bottom:8px;">${c.icon}</div>
+        <div class="cdh-name">${c.name}</div>
+        <div class="cdh-desc">${c.desc} · ${c.members} membres</div>
+        <button onclick="toggleJoin('${id}',this)" style="margin-top:14px;padding:10px 24px;border-radius:var(--r-full);border:none;background:${joined?'rgba(255,255,255,.2)':'#fff'};color:${joined?'rgba(255,255,255,.8)':'var(--teal)'};font-size:14px;font-weight:700;cursor:pointer;">
+          ${joined?'✓ Membre':'Rejoindre la communauté'}
+        </button>
+      </div>
+      <div class="section-title">Membres</div>
+      ${members.map(m=>`
+        <div class="member-card-list">
+          <div class="avatar av-md" style="background:${m.bg};color:${m.col};">${m.init}</div>
+          <div class="mcl-info">
+            <div class="mcl-name">${m.name}</div>
+            <div class="mcl-role">${m.role}</div>
+            <div class="mcl-tags">${m.tags.map(t=>`<span class="tag pill-teal">${t}</span>`).join('')}</div>
+            ${m.avail?`<div class="mcl-avail"><div class="mcl-avail-dot"></div>Disponible pour entretien réseau</div>`:''}
+          </div>
+          <button class="mcl-action" onclick="goScreen('messages')">Message</button>
+        </div>`).join('')}`;
+    document.getElementById('comm-list-view').classList.add('hidden');
+    detail.classList.remove('hidden');
+  }
+
+  function closeComm(){
+    document.getElementById('comm-detail-view').classList.add('hidden');
+    document.getElementById('comm-list-view').classList.remove('hidden');
+  }
+
+  function toggleJoin(id,btn){
+    if(joinedComms.has(id)){joinedComms.delete(id);btn.textContent='Rejoindre la communauté';btn.style.background='#fff';btn.style.color='var(--teal)';}
+    else{joinedComms.add(id);btn.textContent='✓ Membre';btn.style.background='rgba(255,255,255,.2)';btn.style.color='rgba(255,255,255,.8)';showToast();}
+  }
+
+  // ── COACH IA ──
   const COACH_R={
-    prep:["Très bien. Pour un entretien réseau, rappelle-toi : tu n'es pas là pour convaincre, mais pour apprendre et être mémorable. Pose plus de questions que tu n'en réponds.","Je te suggère de préparer une 'phrase d'ancrage'. Ex : 'Je cherche à comprendre comment les directions Ops évoluent dans les scale-ups post-series B.'","N'oublie pas le message de suivi dans les 24h. Mentionne un détail précis de la conversation — ça fait toute la différence."],
-    moral:["Je t'entends. Cette période est éprouvante, et ce que tu ressens est tout à fait normal. La recherche à ce niveau, c'est un vrai travail à plein temps.","Tu n'es pas seul·e dans cette situation. Des centaines de cadres traversent exactement ce que tu vis. Et la plupart retrouvent un poste qui leur correspond mieux que le précédent.","Aujourd'hui, juste une chose : fais quelque chose qui te redonne de l'énergie. Pas forcément lié à la recherche. On reprend demain avec plus de force."],
-    cv:["Ton pitch doit répondre à : pourquoi toi, maintenant, pour ce type de rôle ? Commence par ton identité pro, puis ta valeur ajoutée, puis ta cible.","Pour LinkedIn, pense à ton titre comme un pitch : 'Directrice Ops · Transformation & Scale-up' dit plus que 'Directrice des opérations'.","Le résumé de ton CV doit tenir en 3 lignes et donner envie d'en savoir plus. Évite les adjectifs génériques — préfère des preuves concrètes."],
-    nego:["La règle d'or : ne donne jamais le premier chiffre. Laisse l'employeur ancrer, puis négocie à la hausse avec des arguments factuels.","Prépare 3 leviers : salaire fixe, variable, avantages (RTT, télétravail, formation). Si le fixe est bloqué, joue sur les autres.","Dis toujours que tu es enthousiaste pour le poste avant de parler argent. La négociation se passe mieux quand les deux parties sont déjà engagées."]
+    prep:["Pour un entretien réseau, l'objectif n'est pas de convaincre — c'est d'apprendre et d'être mémorable. Pose plus de questions que tu n'en réponds.","Prépare une 'phrase d'ancrage' : une sentence qui résume ce que tu cherches. Ex : 'Je cherche à comprendre comment les directions Ops évoluent dans les scale-ups post-series B.'","N'oublie pas le message de suivi dans les 24h. Mentionne un détail précis de la conversation — ça fait toute la différence."],
+    moral:["Je t'entends. Cette période est éprouvante et ce que tu ressens est normal. La recherche à ce niveau, c'est un vrai travail à plein temps.","Tu n'es pas seul·e. Des centaines de cadres traversent exactement ce que tu vis. Et la plupart retrouvent un poste qui leur correspond mieux.","Aujourd'hui, juste une chose : fais quelque chose qui te redonne de l'énergie. Pas forcément lié à la recherche. On reprend demain."],
+    cv:["Ton pitch doit répondre à : pourquoi toi, maintenant, pour ce type de rôle ? Identité pro → valeur ajoutée → cible.","Pour LinkedIn, ton titre est un pitch : 'Directrice Ops · Transformation & Scale-up' dit plus que 'Directrice des opérations'.","Le résumé de ton CV : 3 lignes max, zéro adjectif générique, des preuves concrètes."],
+    nego:["Règle d'or : ne donne jamais le premier chiffre. Laisse l'employeur ancrer, puis négocie à la hausse avec des arguments factuels.","Prépare 3 leviers : fixe, variable, avantages (télétravail, RTT, formation). Si le fixe est bloqué, joue sur les autres.","Exprime toujours ton enthousiasme pour le poste avant de parler argent. La négociation se passe mieux quand les deux parties sont engagées."],
+    reseau:["Le réseau ne se fait pas quand on a besoin — il se cultive. 2 entretiens réseau par semaine, même les bonnes semaines.","Après chaque échange, envoie un message de remerciement avec un détail précis de la conversation. C'est ce qui te rend mémorable.","Sur LinkedIn, commente et partage du contenu de ton secteur. Ça crée de la visibilité sans paraître 'en recherche'."]
   };
   let coachMode='prep';
-  function addCoachMsg(text,who) {
-    const body=document.getElementById('coach-body');
-    const div=document.createElement('div'); div.className='cmsg '+who;
-    const bg=who==='coach'?'var(--accent)':'#EEEDFE', col=who==='coach'?'#fff':'var(--accent)', init=who==='coach'?'A':'Moi';
-    div.innerHTML=`<div class="cmsg-ava" style="background:${bg};color:${col};">${init}</div><div class="cmsg-bubble">${text}</div>`;
-    body.appendChild(div); body.scrollTop=body.scrollHeight;
-  }
-  function showTyping() {
-    const body=document.getElementById('coach-body');
-    const div=document.createElement('div'); div.className='cmsg coach'; div.id='typing';
-    div.innerHTML=`<div class="cmsg-ava" style="background:var(--accent);color:#fff;">A</div><div class="cmsg-bubble typing"><span></span><span></span><span></span></div>`;
-    body.appendChild(div); body.scrollTop=body.scrollHeight;
-  }
-  function removeTyping() { document.getElementById('typing')?.remove(); }
-  function sendCoach() {
-    const inp=document.getElementById('coach-inp'), val=inp.value.trim(); if(!val) return;
-    addCoachMsg(val,'user'); inp.value=''; showTyping();
-    const r=COACH_R[coachMode]; setTimeout(()=>{ removeTyping(); addCoachMsg(r[Math.floor(Math.random()*r.length)],'coach'); },1200);
-  }
-  function sendC(text) { addCoachMsg(text,'user'); showTyping(); const r=COACH_R[coachMode]; setTimeout(()=>{ removeTyping(); addCoachMsg(r[Math.floor(Math.random()*r.length)],'coach'); },1200); }
-  function setMode(el,m) { document.querySelectorAll('.mode-pill').forEach(p=>p.classList.remove('active')); el.classList.add('active'); coachMode=m; }
-  function openCoach(msg) { goPage('coach'); setTimeout(()=>sendC(msg),200); }
 
-  // ── Messages ──
-  function openConv(el,init,name,role,bg,col) {
-    document.querySelectorAll('.msg-conv').forEach(c=>c.classList.remove('active')); el.classList.add('active');
-    document.getElementById('msg-ava').textContent=init; document.getElementById('msg-ava').style.background=bg; document.getElementById('msg-ava').style.color=col;
-    document.getElementById('msg-cname').textContent=name; document.getElementById('msg-crole').textContent=role;
-    el.querySelector('.mc-unread')?.remove();
+  function addCMsg(text,who){
+    const b=document.getElementById('coach-body');
+    const d=document.createElement('div'); d.className='cmsg '+who;
+    const bg=who==='coach'?'var(--teal)':'#E6F7F5',col=who==='coach'?'#fff':'var(--teal)',init=who==='coach'?'A':'Moi';
+    d.innerHTML=`<div class="cmsg-ava" style="background:${bg};color:${col};">${init}</div><div class="cmsg-bubble">${text}</div>`;
+    b.appendChild(d); b.scrollTop=b.scrollHeight;
   }
-  function sendMsg() {
-    const inp=document.getElementById('msg-input'), val=inp.value.trim(); if(!val) return;
-    const body=document.getElementById('msg-body');
-    const div=document.createElement('div'); div.className='chat-msg me';
-    div.innerHTML=`<div class="chat-ava" style="background:#EEEDFE;color:var(--accent);">Moi</div><div class="chat-bubble">${val}</div>`;
-    body.appendChild(div); body.scrollTop=body.scrollHeight; inp.value='';
+  function showTyping(){
+    const b=document.getElementById('coach-body');
+    const d=document.createElement('div'); d.className='cmsg coach'; d.id='typing';
+    d.innerHTML=`<div class="cmsg-ava" style="background:var(--teal);color:#fff;">A</div><div class="cmsg-bubble typing"><span></span><span></span><span></span></div>`;
+    b.appendChild(d); b.scrollTop=b.scrollHeight;
   }
-  function filterConvs(q) {
-    document.querySelectorAll('.msg-conv').forEach(c=>{ c.style.display=c.querySelector('.mc-name').textContent.toLowerCase().includes(q.toLowerCase())?'':'none'; });
-  }
+  function removeTyping(){document.getElementById('typing')?.remove();}
+  function sendCoach(){const i=document.getElementById('coach-inp'),v=i.value.trim();if(!v)return;addCMsg(v,'user');i.value='';showTyping();const r=COACH_R[coachMode];setTimeout(()=>{removeTyping();addCMsg(r[Math.floor(Math.random()*r.length)],'coach');},1300);}
+  function sendC(t){addCMsg(t,'user');showTyping();const r=COACH_R[coachMode];setTimeout(()=>{removeTyping();addCMsg(r[Math.floor(Math.random()*r.length)],'coach');},1300);}
+  function setCoachMode(el,m){document.querySelectorAll('.c-mode').forEach(p=>p.classList.remove('active'));el.classList.add('active');coachMode=m;}
+  function openCoach(msg){goScreen('coach');setTimeout(()=>sendC(msg),200);}
 
-  // ── Communauté ──
-  function postVictory() {
-    const text=prompt('Partage ta victoire ou ton bon plan :'); if(!text||!text.trim()) return;
-    const feed=document.getElementById('victory-feed');
-    const div=document.createElement('div'); div.className='victory-post';
-    div.innerHTML=`<div class="vp-emoji">🎉</div><div class="vp-body"><h4>Toi — ${text}</h4><p>À l'instant</p><div class="vp-reactions"><span class="vp-reaction" onclick="addReaction(this,'👏')">👏 0</span><span class="vp-reaction" onclick="addReaction(this,'🔥')">🔥 0</span></div></div>`;
-    feed.prepend(div);
+  // ── MESSAGES ──
+  function openConv(el,init,name,role,bg,col){
+    document.querySelectorAll('.conv-item').forEach(c=>c.classList.remove('active'));
+    el.classList.add('active'); el.querySelector('.ci-unread')?.remove();
+    const at=document.getElementById('chat-ava-top');
+    at.style.background=bg; at.style.color=col; at.textContent=init;
+    document.getElementById('chat-name-top').textContent=name;
+    document.getElementById('chat-role-top').textContent=role;
+    ['chat-ava-msg','chat-ava-msg2'].forEach(id=>{
+      const a=document.getElementById(id); if(a){a.style.background=bg;a.style.color=col;a.textContent=init;}
+    });
+    document.getElementById('conv-list-view').classList.add('hidden');
+    document.getElementById('chat-view-panel').classList.remove('hidden');
   }
-  function addReaction(el,emoji) {
-    const parts=el.textContent.split(' '); const n=parseInt(parts[1]||0)+1;
-    el.textContent=emoji+' '+n; el.style.background='#EEEDFE'; el.style.borderColor='var(--accent2)';
+  function closeChat(){
+    document.getElementById('chat-view-panel').classList.add('hidden');
+    document.getElementById('conv-list-view').classList.remove('hidden');
   }
+  function sendChatMsg(){
+    const i=document.getElementById('chat-inp'),v=i.value.trim();if(!v)return;
+    const b=document.getElementById('chat-body');
+    const d=document.createElement('div'); d.className='chat-msg me';
+    d.innerHTML=`<div class="chat-av" style="background:#E6F7F5;color:var(--teal);">Moi</div><div class="chat-bubble">${v}</div>`;
+    b.appendChild(d); b.scrollTop=b.scrollHeight; i.value='';
+  }
+  function filterConvs(q){document.querySelectorAll('.conv-item').forEach(c=>{c.style.display=c.querySelector('.ci-name').textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
 
-  // Init
-  renderMatchCard();
+  // ── Profil ──
+  function toggleAvail(el){el.classList.toggle('sel');}
+
+  // ── Reactions ──
+  function react(el,emoji){const p=el.textContent.split(' ');const n=parseInt(p[1]||0)+1;el.textContent=emoji+' '+n;el.style.background='var(--teal3)';el.style.borderColor='var(--teal4)';}
+  function filterChip(el){document.querySelectorAll('.filters-row .filter-chip').forEach(c=>{if(c.parentElement===el.parentElement)c.classList.remove('active')});el.classList.add('active');}
+
+  // ── Init ──
+  renderCal();
+  renderComms();
+  renderSwipeCard();
 </script>
-
 </body>
 </html>
