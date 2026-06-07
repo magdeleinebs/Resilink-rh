@@ -358,6 +358,7 @@
     <img class="gate-logo-img" src="logo.png" alt="RésiLink RH" onerror="this.style.display='none';document.getElementById('gate-text').style.display='block'"/>
     <div id="gate-text" style="display:none;font-family:'Caveat',cursive;font-size:36px;font-weight:600;margin-bottom:16px;">RésiLink RH</div>
     <div class="gate-spin"></div>
+    <div style="margin-top:16px;font-size:13px;color:rgba(255,255,255,.6);">Si ça bloque, <a href="index.html" style="color:#fff;font-weight:700;">clique ici</a></div>
   </div>
 </div>
 
@@ -703,7 +704,13 @@
   const app=initializeApp(cfg), auth=getAuth(app), db=getFirestore(app);
   let uid=null, unsubCands=null;
 
+  // Timeout : si Firebase ne répond pas en 6s, rediriger vers index.html
+  const authTimeout = setTimeout(()=>{
+    window.location.href='index.html';
+  }, 6000);
+
   onAuthStateChanged(auth, async user=>{
+    clearTimeout(authTimeout);
     if(!user){window.location.href='index.html';return;}
     uid=user.uid; window._uid=uid;
     const name=user.displayName||user.email.split('@')[0];
