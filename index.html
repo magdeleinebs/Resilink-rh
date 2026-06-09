@@ -641,41 +641,13 @@
 
         <!-- Derniers articles blog -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-          <div class="stitle" style="margin-bottom:0;"> Derniers articles</div>
+          <div class="stitle" style="margin-bottom:0;">Derniers articles</div>
           <button class="mc-see" onclick="goScr('blog')">Voir tout →</button>
         </div>
-
-        <div class="blog-card" onclick="goScr('blog')">
-          <div class="bc-emoji"></div>
-          <div class="bc-body">
-            <div class="bc-cat">Conseils</div>
-            <div class="bc-title">5 erreurs à éviter dans sa recherche cadre</div>
-            <div class="bc-meta">Philippe L. · 8 juin</div>
-          </div>
-          <div class="bc-reacts"><span class="react" onclick="event.stopPropagation();react(this,'')"> 18</span></div>
+        <div id="home-articles-list">
+          <div style="font-size:12px;color:var(--ink3);padding:12px 0;font-style:italic;">Aucun article publié. Soyez le premier à écrire.</div>
         </div>
-
-        <div class="blog-card" onclick="goScr('blog')">
-          <div class="bc-emoji"></div>
-          <div class="bc-body">
-            <div class="bc-cat">Témoignage</div>
-            <div class="bc-title">Comment j'ai retrouvé un poste de DRH en 8 semaines</div>
-            <div class="bc-meta">Sophie M. · 5 juin</div>
-          </div>
-          <div class="bc-reacts"><span class="react" onclick="event.stopPropagation();react(this,'')"> 24</span></div>
-        </div>
-
-        <div class="blog-card" onclick="goScr('blog')">
-          <div class="bc-emoji"></div>
-          <div class="bc-body">
-            <div class="bc-cat">Ressources</div>
-            <div class="bc-title">Le marché des cadres en 2025 : chiffres et tendances</div>
-            <div class="bc-meta">Thomas G. · 1 juin</div>
-          </div>
-          <div class="bc-reacts"><span class="react" onclick="event.stopPropagation();react(this,'')"> 11</span></div>
-        </div>
-
-        <button class="btn btp btfu" style="margin-bottom:13px;" onclick="goScr('blog')"> Écrire un article</button>
+        <button class="btn btp btfu" style="margin-bottom:13px;" onclick="goScr('blog')">Écrire un article</button>
 
         <!-- Fil communauté -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -867,34 +839,10 @@
           <div class="fc" onclick="fChip(this)">Actualités</div>
         </div>
         <div id="blog-posts">
-          <div class="blog-post" onclick="openBlogPost(this)">
-            <div class="bp-img" style="background:#E6F7F5;font-size:48px;"></div>
-            <div class="bp-body">
-              <div class="bp-cats"><span class="tg tgt">Conseils</span><span class="tg tgw">Entretien</span></div>
-              <div class="bp-title">5 erreurs à éviter dans sa recherche d'emploi cadre</div>
-              <div class="bp-excerpt">Après avoir accompagné 200+ cadres en transition, voici les pièges les plus fréquents — et comment les éviter.</div>
-              <div class="bp-meta"><div class="bp-ava" style="background:#E8F0FE;color:#1A73E8;">PL</div><span class="bp-author">Philippe L.</span><span class="bp-date">8 juin 2025</span></div>
-            </div>
-          </div>
-          <div class="blog-post" onclick="openBlogPost(this)">
-            <div class="bp-img" style="background:#F3E8FF;font-size:48px;"></div>
-            <div class="bp-body">
-              <div class="bp-cats"><span class="tg tgp">Témoignage</span></div>
-              <div class="bp-title">Comment j'ai retrouvé un poste de DRH en 8 semaines</div>
-              <div class="bp-excerpt">Mon parcours, mes doutes, et les 3 choses qui ont vraiment changé la donne dans ma recherche.</div>
-              <div class="bp-meta"><div class="bp-ava" style="background:#E6F7F5;color:#2A9D8F;">SM</div><span class="bp-author">Sophie M.</span><span class="bp-date">5 juin 2025</span></div>
-            </div>
-          </div>
-          <div class="blog-post" onclick="openBlogPost(this)">
-            <div class="bp-img" style="background:#FEF3E2;font-size:48px;"></div>
-            <div class="bp-body">
-              <div class="bp-cats"><span class="tg tgg">Ressources</span></div>
-              <div class="bp-title">Le marché des cadres en 2025 : chiffres et tendances</div>
-              <div class="bp-excerpt">Une synthèse des données APEC et des retours terrain pour comprendre le contexte actuel.</div>
-              <div class="bp-meta"><div class="bp-ava" style="background:#FEF3E2;color:#C77A1A;">TG</div><span class="bp-author">Thomas G.</span><span class="bp-date">1 juin 2025</span></div>
-            </div>
-          </div>
-        </div>
+          <div id="blog-empty" style="text-align:center;padding:40px 20px;">
+            <div style="width:28px;height:2px;background:var(--bg2);margin:0 auto 12px;"></div>
+            <p style="font-size:13px;color:var(--ink3);">Aucun article publié.<br>Soyez le premier à partager votre expérience.</p>
+          </div></div>
       </div>
       <div id="blog-editor" class="p" style="display:none;">
         <div class="rowb" style="margin-bottom:13px;">
