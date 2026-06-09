@@ -846,9 +846,9 @@
           <div class="fc" onclick="fChip(this)">Cooptation</div>
         </div>
         <div id="oflist">
-          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">Directeur·rice Financier·ère</div><div class="ofco">Scale-up SaaS · Paris · CDI</div></div></div><div class="oftt"><span class="tg tgt">Finance</span><span class="tg tgw">Senior</span><span class="tg tgg">120-150k€</span></div><div class="offt"><div class="ofby">Partagé par Thomas G.</div><button class="ofbtn">Postuler</button></div></div>
-          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">VP Marketing · Cooptation</div><div class="ofco">Licorne Fintech · Paris · CDI</div></div></div><div class="oftt"><span class="tg tgt">Marketing</span><span class="tg tgw">Dirigeant</span><span class="tg" style="background:#F0FFF4;color:#166534;">Cooptation</span></div><div class="offt"><div class="ofby">Partagé par Amira C.</div><button class="ofbtn">Postuler</button></div></div>
-          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">DRH de transition · Freelance</div><div class="ofco">PME industrielle · Lyon · Mission</div></div></div><div class="oftt"><span class="tg tgt">RH</span><span class="tg tgw">Senior</span><span class="tg" style="background:#EFF6FF;color:#1D4ED8;">Freelance</span></div><div class="offt"><div class="ofby">Partagé par Sophie M.</div><button class="ofbtn">Postuler</button></div></div>
+          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">Directeur·rice Financier·ère</div><div class="ofco">Scale-up SaaS · Paris · CDI</div></div></div><div class="oftt"><span class="tg tgt">Finance</span><span class="tg tgw">Senior</span><span class="tg tgg">120-150k€</span></div><div class="offt"><div class="ofby">Partagé par Thomas G.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''))">Postuler</button></div></div>
+          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">VP Marketing · Cooptation</div><div class="ofco">Licorne Fintech · Paris · CDI</div></div></div><div class="oftt"><span class="tg tgt">Marketing</span><span class="tg tgw">Dirigeant</span><span class="tg" style="background:#F0FFF4;color:#166534;">Cooptation</span></div><div class="offt"><div class="ofby">Partagé par Amira C.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''))">Postuler</button></div></div>
+          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">DRH de transition · Freelance</div><div class="ofco">PME industrielle · Lyon · Mission</div></div></div><div class="oftt"><span class="tg tgt">RH</span><span class="tg tgw">Senior</span><span class="tg" style="background:#EFF6FF;color:#1D4ED8;">Freelance</span></div><div class="offt"><div class="ofby">Partagé par Sophie M.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''))">Postuler</button></div></div>
         </div>
       </div>
     </div>
@@ -1255,7 +1255,7 @@
         <div style="font-size:13px;color:var(--ink2);margin-top:3px;">${data.title||''} ${data.city?'· '+data.city:''}</div>
         <div style="display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
           ${data.linkedin?`<a class="linkedin-btn" href="${data.linkedin}" target="_blank">LinkedIn →</a>`:''}
-          <button class="msg-direct-btn" onclick="closeMod();goScr('messages');">Envoyer un message</button>
+          <button class="msg-direct-btn" onclick="closeMod();ouvrirMessage('${name}');">Envoyer un message</button>
         </div>
       </div>
       ${data.pitch?`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--bg2);"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:6px;">Pitch</div><div style="font-size:13px;color:var(--ink2);line-height:1.6;">${data.pitch}</div></div>`:''}
@@ -1307,7 +1307,21 @@
   document.addEventListener('click',e=>{if(!e.target.closest('#np')&&!e.target.closest('.ib'))closeNP();});
   function pickMood(el){document.querySelectorAll('.mb').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
   function showToast(){const t=document.getElementById('toast');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
-  function react(el,e){const p=el.textContent.split(' ');el.textContent=e+' '+(parseInt(p[1]||0)+1);el.style.background='var(--t3)';}
+  // Compteur de réactions par publication (localStorage)
+  window._reactions = JSON.parse(localStorage.getItem('rl_reactions')||'{}');
+  
+  function react(el, emoji){
+    // Générer un ID unique pour cet élément
+    const key = el.closest('[data-feed-id]')?.dataset.feedId || Math.random().toString(36).slice(2);
+    const rkey = key+'_'+emoji;
+    if(!window._reactions[rkey]) window._reactions[rkey]=0;
+    window._reactions[rkey]++;
+    const count = window._reactions[rkey];
+    el.textContent = emoji+' '+count;
+    el.style.background='var(--t3)';
+    el.style.borderColor='var(--t4)';
+    localStorage.setItem('rl_reactions', JSON.stringify(window._reactions));
+  }
   function postVictory(){const t=prompt('Partagez votre victoire ou ton bon plan :');if(!t||!t.trim())return;const f=document.querySelector('#scr-accueil .p');const d=document.createElement('div');d.className='fi2item';d.innerHTML=`<div class="av avs" style="background:var(--t3);color:var(--t);">Moi</div><div class="fib"><div class="fin">Toi <span style="font-weight:400;color:var(--ink3);font-size:10px;">victoire</span></div><div class="fit">${t}</div><div class="reacts"><span class="react" onclick="react(this,'')"> 0</span></div></div><span class="ftm">À l'instant</span>`;const btn=f.querySelector('.btn');f.insertBefore(d,btn);}
   document.addEventListener('keydown',e=>{if(e.key!=='Enter')return;if(document.getElementById('t-su').classList.contains('active'))window.doSignup?.();else if(document.getElementById('p-re').style.display!=='none')window.doReset?.();else window.doSignin?.();});
 
@@ -1497,6 +1511,19 @@
     document.getElementById('mov').style.display='flex';
   }
 
+  function ouvrirMessage(nomMembre){
+    goScr('messages');
+    // Ouvrir une conversation avec ce membre
+    document.getElementById('conv-view').style.display='none';
+    document.getElementById('chat-view').style.display='flex';
+    const ini=nomMembre.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const av=document.getElementById('cav');
+    av.style.background='var(--t3)';av.style.color='var(--t2)';av.textContent=ini;
+    document.getElementById('cname').textContent=nomMembre;
+    document.getElementById('crole').textContent='Membre RésiLink RH';
+    document.getElementById('cbody').innerHTML='<div style="text-align:center;padding:30px 20px;color:var(--ink3);font-size:12px;">Démarrez la conversation avec '+nomMembre+'</div>';
+  }
+
   function closeMod(e){if(!e||e.target===document.getElementById('mov'))document.getElementById('mov').style.display='none';}
 
   // OFFRES
@@ -1504,7 +1531,28 @@
     document.getElementById('mct').innerHTML=`<div class="mt">Déposer une offre</div><div class="fg"><label>Titre du poste *</label><input class="fi2" id="ot" placeholder="VP Marketing, DAF…"/></div><div class="fg"><label>Entreprise *</label><input class="fi2" id="oco" placeholder="Nom de l'entreprise"/></div><div class="fg"><label>Type</label><select class="fi2" id="oty"><option>CDI</option><option>Freelance</option><option>Cooptation</option><option>Conseil</option></select></div><div class="fg"><label>Localisation</label><input class="fi2" id="oloc" placeholder="Paris, Remote…"/></div><div class="fg"><label>Description</label><textarea class="fi2" id="odesc" placeholder="Détails…"></textarea></div><button class="btn btp btfu" onclick="saveOffre()">Publier</button>`;
     document.getElementById('mov').style.display='flex';
   }
-  function saveOffre(){const t=document.getElementById('ot').value.trim(),co=document.getElementById('oco').value.trim();if(!t||!co)return;const l=document.getElementById('oflist');const d=document.createElement('div');d.className='ofc';d.innerHTML=`<div class="ofh"><div class="oflogo"></div><div><div class="oft">${t}</div><div class="ofco">${co} · ${document.getElementById('oloc').value||'—'} · ${document.getElementById('oty').value}</div></div></div><div class="oftt"><span class="tg tgt">${document.getElementById('oty').value}</span></div><div class="offt"><div class="ofby">Partagé par toi · À l'instant</div><button class="ofbtn">Postuler</button></div>`;l.prepend(d);closeMod();showToast();}
+  function postuler(titre,societe,par){
+  document.getElementById('mct').innerHTML=`
+    <div class="mt">Postuler</div>
+    <div style="font-size:13px;color:var(--ink2);margin-bottom:16px;"><strong>${titre}</strong><br><span style="font-size:11px;color:var(--ink3);">${societe} · Partagé par ${par}</span></div>
+    <div class="fg"><label>Votre message</label><textarea class="fi2" id="postule-msg" style="min-height:100px;" placeholder="Présentez-vous brièvement et expliquez pourquoi ce poste vous intéresse…"></textarea></div>
+    <div class="fg"><label>Votre LinkedIn (optionnel)</label><input class="fi2" id="postule-li" value="${document.getElementById('pf-linkedin')?.value||''}" placeholder="https://linkedin.com/in/votre-profil"/></div>
+    <button class="btn btp btfu" onclick="envoyerCandidature('${par}','${titre}')">Envoyer ma candidature</button>`;
+  document.getElementById('mov').style.display='flex';
+}
+function envoyerCandidature(par,titre){
+  const msg=document.getElementById('postule-msg')?.value.trim();
+  if(!msg){showToast('Veuillez écrire un message');return;}
+  closeMod();
+  ouvrirMessage(par);
+  showToast('Candidature envoyée');
+  // Pré-remplir le message
+  setTimeout(()=>{
+    const inp=document.getElementById('chin');
+    if(inp) inp.value='Bonjour, je souhaite postuler pour le poste : '+titre+'. '+msg;
+  },300);
+}
+function saveOffre(){const t=document.getElementById('ot').value.trim(),co=document.getElementById('oco').value.trim();if(!t||!co)return;const l=document.getElementById('oflist');const d=document.createElement('div');d.className='ofc';d.innerHTML=`<div class="ofh"><div class="oflogo"></div><div><div class="oft">${t}</div><div class="ofco">${co} · ${document.getElementById('oloc').value||'—'} · ${document.getElementById('oty').value}</div></div></div><div class="oftt"><span class="tg tgt">${document.getElementById('oty').value}</span></div><div class="offt"><div class="ofby">Partagé par toi · À l'instant</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''))">Postuler</button></div>`;l.prepend(d);closeMod();showToast();}
   function fChip(el){const row=el.parentElement;row.querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
 
   // MATCHING
