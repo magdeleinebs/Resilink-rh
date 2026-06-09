@@ -1199,7 +1199,7 @@
       if(cooptlist)cooptlist.innerHTML='';
       snap.docs.forEach(d=>{
         const o=d.data();
-        const btnLabel=o.lien?'Voir l'offre':'Postuler';
+        const btnLabel=o.lien?"Voir l'offre":'Postuler';
         const btnAction=o.lien?`window.open('${o.lien}','_blank')`:`ouvrirMessage('${o.authorName||'le déposant'}')`;
         if(oflist){
           const el=document.createElement('div');el.className='ofc';
@@ -1849,7 +1849,7 @@
     }
   },400);
 }
-async 
+
 
 function fChip(el){const row=el.parentElement;row.querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
 
