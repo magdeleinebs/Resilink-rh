@@ -846,9 +846,9 @@
           <div class="fc" onclick="fChip(this)">Cooptation</div>
         </div>
         <div id="oflist">
-          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">Directeur·rice Financier·ère</div><div class="ofco">Scale-up SaaS · Paris · CDI</div></div></div><div class="oftt"><span class="tg tgt">Finance</span><span class="tg tgw">Senior</span><span class="tg tgg">120-150k€</span></div><div class="offt"><div class="ofby">Partagé par Thomas G.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''))">Postuler</button></div></div>
-          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">VP Marketing · Cooptation</div><div class="ofco">Licorne Fintech · Paris · CDI</div></div></div><div class="oftt"><span class="tg tgt">Marketing</span><span class="tg tgw">Dirigeant</span><span class="tg" style="background:#F0FFF4;color:#166534;">Cooptation</span></div><div class="offt"><div class="ofby">Partagé par Amira C.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''))">Postuler</button></div></div>
-          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">DRH de transition · Freelance</div><div class="ofco">PME industrielle · Lyon · Mission</div></div></div><div class="oftt"><span class="tg tgt">RH</span><span class="tg tgw">Senior</span><span class="tg" style="background:#EFF6FF;color:#1D4ED8;">Freelance</span></div><div class="offt"><div class="ofby">Partagé par Sophie M.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''))">Postuler</button></div></div>
+          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">Directeur·rice Financier·ère</div><div class="ofco">Scale-up SaaS · Paris · CDI</div></div></div><div class="oftt"><span class="tg tgt">Finance</span><span class="tg tgw">Senior</span><span class="tg tgg">120-150k€</span></div><div class="offt"><div class="ofby">Partagé par Thomas G.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''), '')">Postuler</button></div></div>
+          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">VP Marketing · Cooptation</div><div class="ofco">Licorne Fintech · Paris · CDI</div></div></div><div class="oftt"><span class="tg tgt">Marketing</span><span class="tg tgw">Dirigeant</span><span class="tg" style="background:#F0FFF4;color:#166534;">Cooptation</span></div><div class="offt"><div class="ofby">Partagé par Amira C.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''), '')">Postuler</button></div></div>
+          <div class="ofc"><div class="ofh"><div class="oflogo"></div><div><div class="oft">DRH de transition · Freelance</div><div class="ofco">PME industrielle · Lyon · Mission</div></div></div><div class="oftt"><span class="tg tgt">RH</span><span class="tg tgw">Senior</span><span class="tg" style="background:#EFF6FF;color:#1D4ED8;">Freelance</span></div><div class="offt"><div class="ofby">Partagé par Sophie M.</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''), '')">Postuler</button></div></div>
         </div>
       </div>
     </div>
@@ -924,137 +924,48 @@
 
     <!-- MESSAGES -->
     <div id="scr-messages" class="scr">
+      <div id="msg-alert" style="display:none;background:#1A1A2A;color:#fff;padding:11px 16px;font-size:12px;line-height:1.5;position:relative;flex-shrink:0;">
+        Les conversations sont conservées <strong>3 mois</strong> puis supprimées. Ne partagez pas d'informations sensibles.
+        <button onclick="localStorage.setItem('msg_alert_seen','1');document.getElementById('msg-alert').style.display='none'" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;">✕</button>
+      </div>
       <div id="conv-view" class="msg-screen">
-        <div style="padding:13px 13px 8px;"><div class="stitle" style="margin-bottom:8px;">Messages</div><input style="width:100%;padding:8px 13px;border:1.5px solid rgba(0,0,0,.1);border-radius:var(--rf);font-size:13px;outline:none;background:var(--bg3);" placeholder="Rechercher…" oninput="fConvs(this.value)"/></div>
-        <div id="convlist">
-          <div class="conv-item" onclick="openConv(this,'SM','Sophie M.','DRH · Paris','#E6F7F5','#2A9D8F')"><div class="av avs" style="background:#E6F7F5;color:#2A9D8F;">SM</div><div class="cib"><div class="cin">Sophie M.</div><div class="cip">Merci pour les conseils !</div></div><div class="cim"><span class="cit">9min</span><div class="ciu"></div></div></div>
-          <div class="conv-item" onclick="openConv(this,'PL','Philippe L.','Coach · Lyon','#E8F0FE','#1A73E8')"><div class="av avs" style="background:#E8F0FE;color:#1A73E8;">PL</div><div class="cib"><div class="cin">Philippe L.</div><div class="cip">Vous êtes disponible jeudi ?</div></div><div class="cim"><span class="cit">1h</span><div class="ciu"></div></div></div>
-          <div class="conv-item" onclick="openConv(this,'AC','Amira C.','Dir. Marketing','#FCE8F0','#C0194A')"><div class="av avs" style="background:#FCE8F0;color:#C0194A;">AC</div><div class="cib"><div class="cin">Amira C.</div><div class="cip">Top, à bientôt !</div></div><div class="cim"><span class="cit">2h</span></div></div>
-          <div class="conv-item" onclick="openConv(this,'TG','Thomas G.','Ex-VP Ops','#FEF3E2','#C77A1A')"><div class="av avs" style="background:#FEF3E2;color:#C77A1A;">TG</div><div class="cib"><div class="cin">Thomas G.</div><div class="cip">J'ai un contact chez Doctolib</div></div><div class="cim"><span class="cit">Hier</span></div></div>
+        <div style="padding:13px 16px 8px;background:var(--w);border-bottom:1px solid var(--bg2);flex-shrink:0;">
+          <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Messages</div>
+          <input id="conv-search" style="width:100%;padding:8px 13px;border:1px solid var(--bg2);border-radius:var(--rf);font-size:13px;outline:none;background:var(--bg);color:var(--ink);" placeholder="Rechercher une conversation…" oninput="fConvs(this.value)"/>
+        </div>
+        <div id="convlist" style="flex:1;overflow-y:auto;">
+          <div style="text-align:center;padding:40px 20px;">
+            <div style="width:28px;height:2px;background:var(--bg2);margin:0 auto 12px;"></div>
+            <p style="font-size:13px;color:var(--ink3);">Vos conversations apparaîtront ici.<br>Connectez-vous avec des membres pour commencer.</p>
+          </div>
         </div>
       </div>
       <div id="chat-view" class="chat-screen" style="display:none;">
         <div class="chat-tb">
           <span class="chat-back" onclick="closeChat()">‹</span>
           <div class="av avs" id="cav"></div>
-          <div><div style="font-size:13px;font-weight:700;" id="cname"></div><div style="font-size:10px;color:var(--ink3);" id="crole"></div></div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:600;" id="cname"></div><div style="font-size:10px;color:var(--ink3);" id="crole"></div></div>
+          <button id="chat-del-btn" onclick="deleteConv()" style="padding:5px 10px;border-radius:var(--r);border:1px solid var(--bg2);background:var(--bg);font-size:11px;color:var(--red);cursor:pointer;font-family:var(--ff);">Supprimer</button>
         </div>
-        <div class="chat-body" id="cbody">
-          <div class="chat-msg other"><div class="chat-av" id="cav1" style="background:#E6F7F5;color:#2A9D8F;">SM</div><div class="chat-bub">Bonjour ! Ravie d'échanger avec toi.</div></div>
-          <div class="chat-msg me"><div class="chat-av" style="background:#E6F7F5;color:var(--t);">Moi</div><div class="chat-bub">Super ! Je cherche à comprendre les codes du secteur.</div></div>
-          <div class="chat-msg other"><div class="chat-av" id="cav2" style="background:#E6F7F5;color:#2A9D8F;">SM</div><div class="chat-bub">Avec plaisir ! Je suis dispo jeudi matin.</div></div>
+        <div class="chat-body" id="cbody" style="flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;">
+          <div style="text-align:center;padding:20px;font-size:12px;color:var(--ink3);">Démarrez la conversation</div>
         </div>
-        <div class="chat-ib">
-          <input class="chat-in" id="chin" placeholder="Votre message…" onkeydown="if(event.key==='Enter')sendChat()"/>
-          <button class="chat-snd" onclick="sendChat()">➤</button>
+        <div class="chat-ib" style="flex-direction:column;gap:6px;padding:10px 14px;border-top:1px solid var(--bg2);background:var(--w);">
+          <div style="display:flex;gap:7px;">
+            <input class="chat-in" id="chin" placeholder="Votre message…" onkeydown="if(event.key==='Enter')sendChat()"/>
+            <button class="chat-snd" onclick="sendChat()">→</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--ink3);padding:5px 10px;border-radius:var(--r);border:1px solid var(--bg2);background:var(--bg);transition:all .15s;">
+              📎 Joindre un CV (PDF)
+              <input type="file" id="cv-upload" accept=".pdf,.doc,.docx" style="display:none;" onchange="attachCV(this)"/>
+            </label>
+            <span id="cv-name" style="font-size:11px;color:var(--t);font-weight:500;display:none;"></span>
+            <button id="cv-remove" onclick="removeCV()" style="display:none;font-size:11px;color:var(--red);border:none;background:none;cursor:pointer;">✕</button>
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- PROFIL -->
-    <div id="scr-profil" class="scr">
-      <div class="p">
-        <div class="ph">
-          <div class="phav" id="phav">?</div>
-          <div class="phn" id="phn">—</div>
-          <div class="pht" id="pht">—</div>
-          <div class="cbw">
-            <span style="font-size:10px;color:rgba(255,255,255,.7);font-weight:700;">Profil complété</span>
-            <div class="cbt"><div class="cbf" id="cbf" style="width:0%"></div></div>
-            <span class="cbp" id="cbp">0%</span>
-          </div>
-        </div>
-
-        <div class="card">
-          <div style="font-size:13px;font-weight:800;margin-bottom:11px;">Informations</div>
-          <div class="fg"><label>Prénom et nom</label><input class="fi2" id="pf-n" placeholder="Claire Dupont"/></div>
-          <div class="fg"><label>Titre professionnel</label><input class="fi2" id="pf-t" placeholder="Directrice Opérations · Scale-up"/></div>
-          <div class="fg"><label>Ville</label><input class="fi2" id="pf-c" placeholder="Paris"/></div>
-          <div class="fg">
-            <label>Profil LinkedIn</label>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <input class="fi2" id="pf-linkedin" placeholder="https://linkedin.com/in/ton-profil" style="flex:1;"/>
-              <a id="linkedin-link" href="#" target="_blank" style="flex-shrink:0;padding:10px 14px;border-radius:var(--r);background:#0A66C2;color:#fff;font-size:12px;font-weight:700;text-decoration:none;display:none;">Voir →</a>
-            </div>
-          </div>
-          <div class="fg"><label>Secteur</label><select class="fi2" id="pf-s"><option value="">— Choisir —</option><option>Direction générale</option><option>Finance & Contrôle</option><option>RH & Talent</option><option>Marketing & Com</option><option>Opérations & Supply</option><option>Tech & Digital</option><option>Commercial & Dév.</option></select></div>
-          <div class="fg"><label>Niveau</label><select class="fi2" id="pf-l"><option value="">— Choisir —</option><option value="junior">Junior (0-5 ans)</option><option value="inter">Intermédiaire (5-10 ans)</option><option value="senior">Senior (10-15 ans)</option><option value="diri">Cadre dirigeant (15+ ans)</option></select></div>
-        </div>
-
-        <div class="card">
-          <div style="font-size:13px;font-weight:800;margin-bottom:11px;">Ce que je cherche & ce que j'offre</div>
-          <div class="seek-offer-grid">
-            <div class="so-box seek">
-              <div class="so-label seek"> Je cherche</div>
-              <textarea class="so-ta" id="pf-seek" placeholder="Ex : Un poste de DAF en scale-up, des connexions dans la fintech, un mentor en transformation digitale…"></textarea>
-            </div>
-            <div class="so-box offer">
-              <div class="so-label offer">🎁 J'offre</div>
-              <textarea class="so-ta" id="pf-offer" placeholder="Ex : Mon réseau dans l'industrie, mon expertise en restructuration, de l'aide pour préparer des entretiens financiers…"></textarea>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div style="font-size:13px;font-weight:800;margin-bottom:11px;">Ma recherche</div>
-          <div class="fg"><label>Stade</label><select class="fi2" id="pf-st"><option value="">— Choisir —</option><option>Recherche active</option><option>En veille discrète</option><option>Reconversion</option><option>En poste, je construis</option></select></div>
-          <div class="fg"><label>Poste visé</label><input class="fi2" id="pf-tg" placeholder="DAF, DG, VP Finance…"/></div>
-          <div class="fg"><label>Pitch (2-3 phrases)</label><textarea class="fi2" id="pf-pitch" placeholder="Ex : Directrice Ops avec 12 ans en scale-up…"></textarea></div>
-        </div>
-
-        <div class="card">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:10px;">Ce que je cherche &amp; ce que j'apporte</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-            <div style="border-radius:var(--r);padding:11px;border:1px solid #E9D5FF;background:#FAF5FF;">
-              <div style="font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Je cherche</div>
-              <textarea id="pf-seek" style="width:100%;border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;resize:none;min-height:60px;line-height:1.5;font-family:var(--ff);" placeholder="Ex : Un poste de DAF en scale-up…"></textarea>
-            </div>
-            <div style="border-radius:var(--r);padding:11px;border:1px solid var(--gold2);background:var(--gold3);">
-              <div style="font-size:10px;font-weight:600;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">J'apporte</div>
-              <textarea id="pf-offer" style="width:100%;border:none;background:transparent;font-size:12px;color:var(--ink);outline:none;resize:none;min-height:60px;line-height:1.5;font-family:var(--ff);" placeholder="Ex : Mon réseau dans l'industrie…"></textarea>
-            </div>
-          </div>
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);margin-bottom:8px;">Ce que je propose au réseau</div>
-          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px;">
-            <div class="ro-item" id="ro-entretien" onclick="this.classList.toggle('sel')"><span style="width:6px;height:6px;border-radius:50%;background:var(--t);flex-shrink:0;display:inline-block;"></span>Entretien réseau</div>
-            <div class="ro-item" id="ro-simulation" onclick="this.classList.toggle('sel')"><span style="width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0;display:inline-block;"></span>Simulation d'entretien</div>
-            <div class="ro-item" id="ro-pitch" onclick="this.classList.toggle('sel')"><span style="width:6px;height:6px;border-radius:50%;background:var(--purple);flex-shrink:0;display:inline-block;"></span>Préparation pitch</div>
-            <div class="ro-item" id="ro-relation" onclick="this.classList.toggle('sel')"><span style="width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;display:inline-block;"></span>Mise en relation</div>
-          </div>
-          <div class="fg" style="margin-bottom:0;"><label>Précisez votre offre</label><textarea class="fi2" id="pf-reseau-detail" placeholder="Ex : Je peux recevoir 2 cadres par semaine pour des échanges de 30 min…"></textarea></div>
-        </div>
-        <div class="card">
-          <div style="font-size:13px;font-weight:800;margin-bottom:5px;">Disponibilités entretiens réseau</div>
-          <div style="font-size:11px;color:var(--ink3);margin-bottom:9px;">Coche tes créneaux disponibles</div>
-          <div class="avslots">
-            <div class="avslot" onclick="this.classList.toggle('sel')">Lun matin</div>
-            <div class="avslot" onclick="this.classList.toggle('sel')">Lun après-midi</div>
-            <div class="avslot" onclick="this.classList.toggle('sel')">Mar matin</div>
-            <div class="avslot" onclick="this.classList.toggle('sel')">Mar après-midi</div>
-            <div class="avslot" onclick="this.classList.toggle('sel')">Mer matin</div>
-            <div class="avslot" onclick="this.classList.toggle('sel')">Mer après-midi</div>
-            <div class="avslot" onclick="this.classList.toggle('sel')">Jeu matin</div>
-            <div class="avslot" onclick="this.classList.toggle('sel')">Jeu après-midi</div>
-            <div class="avslot" onclick="this.classList.toggle('sel')">Ven matin</div>
-          </div>
-        </div>
-
-        <button class="btn btp btfu" onclick="saveProfile()" style="margin-bottom:8px;">Enregistrer le profil</button>
-        <button class="btn btg btfu" onclick="doSignOut()">Se déconnecter</button>
-      </div>
-    </div>
-
-  </div><!-- /cnt -->
-
-  <div class="bn">
-    <button class="bni active" onclick="goScr('accueil',this)"><span class="bni-ic"></span><span class="bni-lb">Accueil</span></button>
-    <button class="bni" onclick="goScr('candidatures',this)"><span class="bni-ic"></span><span class="bni-lb">Suivi</span></button>
-    <button class="bni" onclick="goScr('agenda',this)"><span class="bni-ic"></span><span class="bni-lb">Agenda</span></button>
-    <button class="bni" onclick="goScr('communautes',this)"><span class="bni-ic"></span><span class="bni-lb">Communautés</span></button>
-    <button class="bni" onclick="goScr('blog',this)"><span class="bni-ic"></span><span class="bni-lb">Blog</span></button>
-    <button class="bni" onclick="goScr('offres',this)"><span class="bni-ic"></span><span class="bni-lb">Offres</span></button>
-  </div>
-</div><!-- /app -->
 
 <!-- ADMIN PANEL -->
 <div id="admin-panel" style="position:fixed;inset:0;background:var(--w);z-index:600;overflow-y:auto;display:none;">
@@ -1185,7 +1096,180 @@
 
   window._addCand=async data=>{if(uid)await addDoc(collection(db,'users',uid,'candidatures'),{...data,createdAt:serverTimestamp()});};
   window._updCand=async(id,data)=>{if(uid)await updateDoc(doc(db,'users',uid,'candidatures',id),data);};
-  window.doSignOut=async()=>{if(unsub)unsub();await signOut(auth);document.getElementById('app').style.display='none';document.getElementById('landing').style.display='block';};
+  window.doSignOut=async()=>{if(unsub)unsub();if(window._unsubConvs)window._unsubConvs();if(window._unsubMsgs)window._unsubMsgs();await signOut(auth);document.getElementById('app').style.display='none';document.getElementById('landing').style.display='block';};
+
+  // ═══ MESSAGERIE FIREBASE ═══
+  window._currentConvId = null;
+  window._currentConvPartner = null;
+  window._attachedCV = null;
+
+  // Charger toutes les conversations de l'utilisateur
+  function loadConversations(){
+    if(!uid) return;
+    if(window._unsubConvs) window._unsubConvs();
+    const q = query(
+      collection(db, 'conversations'),
+      orderBy('updatedAt', 'desc')
+    );
+    window._unsubConvs = onSnapshot(q, snap => {
+      const convlist = document.getElementById('convlist');
+      const myConvs = snap.docs.filter(d => {
+        const data = d.data();
+        return data.members && data.members.includes(uid);
+      });
+      if(myConvs.length === 0){
+        convlist.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="width:28px;height:2px;background:var(--bg2);margin:0 auto 12px;"></div><p style="font-size:13px;color:var(--ink3);">Vos conversations apparaîtront ici.<br>Connectez-vous avec des membres pour commencer.</p></div>';
+        return;
+      }
+      convlist.innerHTML = '';
+      myConvs.forEach(d => {
+        const data = d.data();
+        const partnerId = data.members.find(m => m !== uid);
+        const partnerName = data.memberNames?.[partnerId] || 'Membre';
+        const lastMsg = data.lastMessage || '';
+        const lastTime = data.updatedAt?.toDate ? formatMsgTime(data.updatedAt.toDate()) : '';
+        const unread = data.unread?.[uid] > 0;
+        const ini = partnerName.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+        const el = document.createElement('div');
+        el.className = 'conv-item';
+        el.innerHTML = `
+          <div class="av avs" style="background:var(--t3);color:var(--t2);">${ini}</div>
+          <div class="cib">
+            <div class="cin">${partnerName}</div>
+            <div class="cip">${lastMsg}</div>
+          </div>
+          <div class="cim">
+            <span class="cit">${lastTime}</span>
+            ${unread ? '<div class="ciu"></div>' : ''}
+          </div>`;
+        el.onclick = () => openFirebaseConv(d.id, partnerId, partnerName);
+        convlist.appendChild(el);
+      });
+    });
+  }
+
+  // Ouvrir une conversation Firebase
+  window.openFirebaseConv = async function(convId, partnerId, partnerName){
+    window._currentConvId = convId;
+    window._currentConvPartner = {id: partnerId, name: partnerName};
+    // Afficher alerte si pas encore vue
+    if(!localStorage.getItem('msg_alert_seen')){
+      document.getElementById('msg-alert').style.display = 'flex';
+    }
+    // Afficher la vue chat
+    document.getElementById('conv-view').style.display = 'none';
+    document.getElementById('chat-view').style.display = 'flex';
+    const ini = partnerName.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const av = document.getElementById('cav');
+    av.style.background = 'var(--t3)'; av.style.color = 'var(--t2)'; av.textContent = ini;
+    document.getElementById('cname').textContent = partnerName;
+    document.getElementById('crole').textContent = 'Membre RésiLink RH';
+    // Admin peut supprimer
+    const delBtn = document.getElementById('chat-del-btn');
+    if(delBtn) delBtn.style.display = window._isAdmin ? 'block' : 'none';
+    // Marquer comme lu
+    if(uid) updateDoc(doc(db,'conversations',convId), {[`unread.${uid}`]: 0}).catch(()=>{});
+    // Écouter les messages
+    if(window._unsubMsgs) window._unsubMsgs();
+    const cbody = document.getElementById('cbody');
+    cbody.innerHTML = '';
+    const q = query(collection(db,'conversations',convId,'messages'), orderBy('createdAt','asc'));
+    window._unsubMsgs = onSnapshot(q, snap => {
+      cbody.innerHTML = '';
+      if(snap.empty){
+        cbody.innerHTML = '<div style="text-align:center;padding:20px;font-size:12px;color:var(--ink3);">Démarrez la conversation</div>';
+        return;
+      }
+      snap.docs.forEach(d => {
+        const m = d.data();
+        const isMe = m.senderId === uid;
+        const div = document.createElement('div');
+        div.className = 'chat-msg ' + (isMe ? 'me' : 'other');
+        const ini2 = (m.senderName||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+        let content = '';
+        if(m.type === 'cv'){
+          content = `<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--bg2);">
+            <span style="font-size:18px;">📄</span>
+            <div><div style="font-size:12px;font-weight:600;">${m.fileName||'CV'}</div>
+            <a href="${m.fileUrl}" target="_blank" style="font-size:11px;color:var(--t);">Télécharger</a></div>
+          </div>`;
+        } else {
+          content = `<div class="chat-bub">${m.text||''}</div>`;
+        }
+        div.innerHTML = `<div class="chat-av" style="background:var(--t3);color:var(--t2);">${isMe?'Moi':ini2}</div>${content}`;
+        cbody.appendChild(div);
+      });
+      cbody.scrollTop = cbody.scrollHeight;
+    });
+  };
+
+  // Créer ou trouver une conversation entre 2 membres
+  window.getOrCreateConv = async function(partnerId, partnerName){
+    if(!uid) return null;
+    // Chercher une conv existante
+    const q = query(collection(db,'conversations'));
+    const snap = await getDocs(q);
+    const existing = snap.docs.find(d => {
+      const data = d.data();
+      return data.members && data.members.includes(uid) && data.members.includes(partnerId);
+    });
+    if(existing) return existing.id;
+    // Créer nouvelle conv
+    const myName = document.getElementById('phn')?.textContent || 'Membre';
+    const ref = await addDoc(collection(db,'conversations'), {
+      members: [uid, partnerId],
+      memberNames: {[uid]: myName, [partnerId]: partnerName},
+      lastMessage: '',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      unread: {[uid]: 0, [partnerId]: 0}
+    });
+    return ref.id;
+  };
+
+  // Envoyer un message Firebase
+  window.sendFirebaseMsg = async function(text, type='text', fileData=null){
+    if(!window._currentConvId || !uid) return;
+    const myName = document.getElementById('phn')?.textContent || 'Membre';
+    const msgData = {
+      senderId: uid,
+      senderName: myName,
+      type: type,
+      createdAt: serverTimestamp()
+    };
+    if(type === 'text') msgData.text = text;
+    if(type === 'cv') { msgData.fileName = fileData.name; msgData.fileUrl = fileData.url; msgData.text = '📄 '+fileData.name; }
+    await addDoc(collection(db,'conversations',window._currentConvId,'messages'), msgData);
+    // Mettre à jour la conv
+    const partnerId = window._currentConvPartner?.id;
+    await updateDoc(doc(db,'conversations',window._currentConvId), {
+      lastMessage: type==='cv' ? '📄 CV joint' : text,
+      updatedAt: serverTimestamp(),
+      ...(partnerId ? {[`unread.${partnerId}`]: 1} : {})
+    });
+  };
+
+  // Supprimer une conversation (admin)
+  window.deleteConv = async function(){
+    if(!window._currentConvId) return;
+    if(!confirm('Supprimer cette conversation ? Cette action est irréversible.')) return;
+    // Supprimer les messages
+    const msgs = await getDocs(collection(db,'conversations',window._currentConvId,'messages'));
+    for(const m of msgs.docs) await deleteDoc(doc(db,'conversations',window._currentConvId,'messages',m.id));
+    await deleteDoc(doc(db,'conversations',window._currentConvId));
+    closeChat();
+    showToast('Conversation supprimée');
+    window._currentConvId = null;
+  };
+
+  function formatMsgTime(date){
+    const now = new Date(), d = new Date(date);
+    const diff = (now - d) / 1000;
+    if(diff < 60) return 'À l\'instant';
+    if(diff < 3600) return Math.floor(diff/60)+'min';
+    if(diff < 86400) return Math.floor(diff/3600)+'h';
+    return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+  }
 
   // Charger les membres qui proposent au réseau
   async function loadReseauOffers(){
@@ -1528,31 +1612,28 @@
 
   // OFFRES
   function showOffreModal(){
-    document.getElementById('mct').innerHTML=`<div class="mt">Déposer une offre</div><div class="fg"><label>Titre du poste *</label><input class="fi2" id="ot" placeholder="VP Marketing, DAF…"/></div><div class="fg"><label>Entreprise *</label><input class="fi2" id="oco" placeholder="Nom de l'entreprise"/></div><div class="fg"><label>Type</label><select class="fi2" id="oty"><option>CDI</option><option>Freelance</option><option>Cooptation</option><option>Conseil</option></select></div><div class="fg"><label>Localisation</label><input class="fi2" id="oloc" placeholder="Paris, Remote…"/></div><div class="fg"><label>Description</label><textarea class="fi2" id="odesc" placeholder="Détails…"></textarea></div><button class="btn btp btfu" onclick="saveOffre()">Publier</button>`;
+    document.getElementById('mct').innerHTML=`<div class="mt">Déposer une offre</div><div class="fg"><label>Titre du poste *</label><input class="fi2" id="ot" placeholder="VP Marketing, DAF…"/></div><div class="fg"><label>Entreprise *</label><input class="fi2" id="oco" placeholder="Nom de l'entreprise"/></div><div class="fg"><label>Type</label><select class="fi2" id="oty"><option>CDI</option><option>Freelance</option><option>Cooptation</option><option>Conseil</option></select></div><div class="fg"><label>Localisation</label><input class="fi2" id="oloc" placeholder="Paris, Remote…"/></div><div class="fg"><label>Description</label><textarea class="fi2" id="odesc" placeholder="Détails…"></textarea></div><div class="fg"><label>Lien de l'offre (optionnel)</label><input class="fi2" id="olien" placeholder="https://… lien vers l'offre en ligne"/></div><button class="btn btp btfu" onclick="saveOffre()">Publier</button>`;
     document.getElementById('mov').style.display='flex';
   }
-  function postuler(titre,societe,par){
-  document.getElementById('mct').innerHTML=`
-    <div class="mt">Postuler</div>
-    <div style="font-size:13px;color:var(--ink2);margin-bottom:16px;"><strong>${titre}</strong><br><span style="font-size:11px;color:var(--ink3);">${societe} · Partagé par ${par}</span></div>
-    <div class="fg"><label>Votre message</label><textarea class="fi2" id="postule-msg" style="min-height:100px;" placeholder="Présentez-vous brièvement et expliquez pourquoi ce poste vous intéresse…"></textarea></div>
-    <div class="fg"><label>Votre LinkedIn (optionnel)</label><input class="fi2" id="postule-li" value="${document.getElementById('pf-linkedin')?.value||''}" placeholder="https://linkedin.com/in/votre-profil"/></div>
-    <button class="btn btp btfu" onclick="envoyerCandidature('${par}','${titre}')">Envoyer ma candidature</button>`;
-  document.getElementById('mov').style.display='flex';
-}
-function envoyerCandidature(par,titre){
-  const msg=document.getElementById('postule-msg')?.value.trim();
-  if(!msg){showToast('Veuillez écrire un message');return;}
+  function postuler(titre, societe, par, lienOffre){
+  // Si un lien externe est disponible, l'ouvrir directement
+  if(lienOffre && lienOffre !== 'undefined' && lienOffre.startsWith('http')){
+    window.open(lienOffre, '_blank');
+    return;
+  }
+  // Sinon ouvrir un message privé vers le déposant
   closeMod();
   ouvrirMessage(par);
-  showToast('Candidature envoyée');
-  // Pré-remplir le message
+  showToast('Ouverture du message vers '+par);
   setTimeout(()=>{
     const inp=document.getElementById('chin');
-    if(inp) inp.value='Bonjour, je souhaite postuler pour le poste : '+titre+'. '+msg;
-  },300);
+    if(inp){
+      inp.value='Bonjour, je suis intéressé(e) par votre offre : '+titre+' ('+societe+'). Seriez-vous disponible pour en discuter ?';
+      inp.focus();
+    }
+  },400);
 }
-function saveOffre(){const t=document.getElementById('ot').value.trim(),co=document.getElementById('oco').value.trim();if(!t||!co)return;const l=document.getElementById('oflist');const d=document.createElement('div');d.className='ofc';d.innerHTML=`<div class="ofh"><div class="oflogo"></div><div><div class="oft">${t}</div><div class="ofco">${co} · ${document.getElementById('oloc').value||'—'} · ${document.getElementById('oty').value}</div></div></div><div class="oftt"><span class="tg tgt">${document.getElementById('oty').value}</span></div><div class="offt"><div class="ofby">Partagé par toi · À l'instant</div><button class="ofbtn" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''))">Postuler</button></div>`;l.prepend(d);closeMod();showToast();}
+function saveOffre(){const t=document.getElementById('ot').value.trim(),co=document.getElementById('oco').value.trim();if(!t||!co)return;const l=document.getElementById('oflist');const d=document.createElement('div');d.className='ofc';d.innerHTML=`<div class="ofh"><div class="oflogo"></div><div><div class="oft">${t}</div><div class="ofco">${co} · ${document.getElementById('oloc').value||'—'} · ${document.getElementById('oty').value}</div></div></div><div class="oftt"><span class="tg tgt">${document.getElementById('oty').value}</span></div><div class="offt"><div class="ofby">Partagé par vous</div><button class="ofbtn" onclick="(typeof lien!=='undefined'&&lien)?window.open(lien,'_blank'):postuler(t,co,'vous','')" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''), '')">Postuler</button></div>`;l.prepend(d);closeMod();showToast();}
   function fChip(el){const row=el.parentElement;row.querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
 
   // MATCHING
@@ -1693,17 +1774,58 @@ function saveOffre(){const t=document.getElementById('ot').value.trim(),co=docum
   function closeBlogPost(){document.getElementById('blog-post-view').style.display='none';document.getElementById('blog-list').style.display='block';}
 
   // MESSAGES
-  function openConv(el,init,name,role,bg,col){
-    document.getElementById('conv-view').style.display='none';
-    document.getElementById('chat-view').style.display='flex';
-    const av=document.getElementById('cav');av.style.background=bg;av.style.color=col;av.textContent=init;
-    document.getElementById('cname').textContent=name;
-    document.getElementById('crole').textContent=role;
-    ['cav1','cav2'].forEach(id=>{const a=document.getElementById(id);if(a){a.style.background=bg;a.style.color=col;a.textContent=init;}});
+  // Ouvrir une conversation Firebase (appelé depuis ouvrirMessage)
+  window.ouvrirMessage = async function(partnerName, partnerId){
+    if(!uid){showToast('Connectez-vous pour envoyer un message');return;}
+    if(!localStorage.getItem('msg_alert_seen')){
+      document.getElementById('msg-alert').style.display='flex';
+    }
+    let pid = partnerId || 'u_'+btoa(partnerName).slice(0,8);
+    const convId = await window.getOrCreateConv(pid, partnerName);
+    if(!convId) return;
+    goScr('messages');
+    openFirebaseConv(convId, pid, partnerName);
+  };
+
+  function closeChat(){
+    document.getElementById('chat-view').style.display='none';
+    document.getElementById('conv-view').style.display='flex';
+    if(window._unsubMsgs){window._unsubMsgs();window._unsubMsgs=null;}
+    window._currentConvId=null; window._currentConvPartner=null; window._attachedCV=null;
+    const cn=document.getElementById('cv-name'); if(cn)cn.style.display='none';
+    const cr=document.getElementById('cv-remove'); if(cr)cr.style.display='none';
   }
-  function closeChat(){document.getElementById('chat-view').style.display='none';document.getElementById('conv-view').style.display='flex';}
-  function sendChat(){const i=document.getElementById('chin'),v=i.value.trim();if(!v)return;const b=document.getElementById('cbody');const d=document.createElement('div');d.className='chat-msg me';d.innerHTML=`<div class="chat-av" style="background:#E6F7F5;color:var(--t);">Moi</div><div class="chat-bub">${v}</div>`;b.appendChild(d);b.scrollTop=b.scrollHeight;i.value='';}
-  function fConvs(q){document.querySelectorAll('.conv-item').forEach(c=>{c.style.display=c.querySelector('.cin').textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
+
+  async function sendChat(){
+    const i=document.getElementById('chin'), v=i.value.trim();
+    if(!v && !window._attachedCV) return;
+    if(window._attachedCV){ await window.sendFirebaseMsg('','cv',window._attachedCV); removeCV(); }
+    if(v){ await window.sendFirebaseMsg(v,'text'); i.value=''; }
+  }
+
+  function attachCV(input){
+    if(!input.files||!input.files[0])return;
+    const file=input.files[0];
+    const r=new FileReader();
+    r.onload=e=>{
+      window._attachedCV={name:file.name,url:e.target.result};
+      const cn=document.getElementById('cv-name'); if(cn){cn.textContent=file.name;cn.style.display='inline';}
+      const cr=document.getElementById('cv-remove'); if(cr)cr.style.display='inline';
+    };
+    r.readAsDataURL(file);
+  }
+  function removeCV(){
+    window._attachedCV=null;
+    const cn=document.getElementById('cv-name'); if(cn)cn.style.display='none';
+    const cr=document.getElementById('cv-remove'); if(cr)cr.style.display='none';
+    const cu=document.getElementById('cv-upload'); if(cu)cu.value='';
+  }
+
+  function fConvs(q){
+    document.querySelectorAll('#convlist .conv-item').forEach(c=>{
+      c.style.display=c.querySelector('.cin')?.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+    });
+  }
 
   // INIT
   renderCal();renderComms();renderSwipe();renderAgCal();
