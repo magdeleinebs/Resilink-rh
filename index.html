@@ -418,7 +418,7 @@ textarea.fi2{resize:vertical;min-height:70px;}select.fi2{cursor:pointer;}
       <div class="p">
         <div class="rowb" style="margin-bottom:12px;">
           <div style="font-size:16px;font-weight:600;">Agenda</div>
-          <button class="btn btn-p btn-sm" id="btn-add-event" onclick="showAddEvent()" style="display:none;">+ Créer un événement</button>
+          <button class="btn btn-p btn-sm" id="btn-add-event" onclick="showAddEvent()">+ Créer un événement</button>
         </div>
         <!-- Mini calendrier -->
         <div class="card" style="margin-bottom:12px;">
@@ -458,7 +458,7 @@ textarea.fi2{resize:vertical;min-height:70px;}select.fi2{cursor:pointer;}
           <div id="comm-grid"></div>
         </div>
       </div>
-      <div id="comm-det-view" style="display:none;"></div>
+      <div id="comm-det-view" style="display:none;position:relative;"></div>
     </div>
     <!-- OFFRES -->
     <div id="scr-offres" class="scr">
@@ -602,6 +602,9 @@ const cfg={apiKey:"AIzaSyCgAS2_hOgHlQNrFW25StgZ6Je0QcwTY-g",authDomain:"resilink
 const app=initializeApp(cfg),auth=getAuth(app),db=getFirestore(app),gp=new GoogleAuthProvider();
 let uid=null,unsubCands=null,unsubConvs=null,unsubMsgs=null;
 window._isAdmin=false;
+window._firestoreDb=db;
+window._uid=()=>uid;
+window._commDb={collection,query,orderBy,onSnapshot,limit,addDoc,serverTimestamp};
 
 const ERRS={"auth/email-already-in-use":"Email déjà utilisé.","auth/invalid-email":"Email invalide.","auth/weak-password":"Mot de passe trop court (8 car. min).","auth/user-not-found":"Aucun compte avec cet email.","auth/wrong-password":"Mot de passe incorrect.","auth/invalid-credential":"Email ou mot de passe incorrect.","auth/too-many-requests":"Trop de tentatives, réessayez plus tard."};
 function ferr(code){return ERRS[code]||"Une erreur est survenue.";}
@@ -640,7 +643,7 @@ async function initUser(user){
   if(d.reseauOffers)d.reseauOffers.forEach(o=>{const el=document.getElementById("ro-"+o);if(el)el.classList.add("on");});
   if(d.availability)d.availability.forEach(sl=>{document.querySelectorAll(".avslot").forEach(s=>{if(s.textContent===sl)s.classList.add("on");});});
   updComp(d);
-  if(window._isAdmin){document.getElementById("admin-btns-zone").style.display="flex";document.getElementById("btn-add-event").style.display="flex";}
+  if(window._isAdmin){document.getElementById("admin-btns-zone").style.display="flex";}
   document.getElementById("landing").style.display="none";
   document.getElementById("app").style.display="flex";
   loadCands();
@@ -1133,12 +1136,99 @@ function renderComms(){
   });
   if(!g.children.length)g.innerHTML='<div class="empty"><div class="empty-line"></div><p>Aucune communauté pour ces filtres.</p></div>';
 }
+let unsubComm=null;
 function openComm(cm){
+  if(unsubComm){unsubComm();unsubComm=null;}
   const det=document.getElementById("comm-det-view");
-  document.getElementById("comm-list-view").style.display="none";det.style.display="block";
-  det.innerHTML='<div class="p"><div class="comm-det-head"><div class="comm-back" onclick="closeComm()">← Communautés</div><div class="comm-det-name">'+cm.name+'</div><div class="comm-det-desc">'+cm.desc+'</div></div><div style="font-size:13px;color:var(--ink3);text-align:center;padding:20px;">Rejoignez et rencontrez les membres de cette communauté.<br><br><button class="btn btn-p" onclick="showToast(\'Vous avez rejoint la communauté !\')">Rejoindre</button></div></div>';
+  document.getElementById("comm-list-view").style.display="none";
+  det.style.display="block";
+  det.innerHTML='<div style="display:flex;flex-direction:column;position:absolute;inset:0;">'
+    +'<div style="flex-shrink:0;padding:12px 16px;background:var(--w);border-bottom:1px solid var(--bg2);">'
+    +'<div style="font-size:12px;color:var(--ink3);cursor:pointer;margin-bottom:8px;" onclick="closeComm()">&#8592; Communaut&#233;s</div>'
+    +'<div style="display:flex;align-items:center;gap:10px;">'
+    +'<div style="width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;background:'+cm.color+';color:'+cm.col2+';">'+cm.ico+'</div>'
+    +'<div><div style="font-size:15px;font-weight:600;">'+cm.name+'</div>'
+    +'<div style="font-size:11px;color:var(--ink3);">'+cm.desc+'</div></div>'
+    +'</div></div>'
+    +'<div id="comm-msgs" style="flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;"></div>'
+    +'<div style="flex-shrink:0;padding:10px 14px;background:var(--w);border-top:1px solid var(--bg2);display:flex;gap:8px;">'
+    +'<input id="comm-input" class="chat-in" placeholder="Votre message..." />'
+    +'<button class="chat-snd" id="comm-send-btn">&#x2192;</button>'
+    +'</div></div>';
+  document.getElementById("comm-send-btn").onclick=function(){postCommMsg(cm.id);};
+  document.getElementById("comm-input").onkeydown=function(e){if(e.key==="Enter")postCommMsg(cm.id);};
+  loadCommMsgs(cm.id);
 }
-function closeComm(){document.getElementById("comm-det-view").style.display="none";document.getElementById("comm-list-view").style.display="block";}
+function loadCommMsgs(commId){
+  var msgsEl=document.getElementById("comm-msgs");
+  if(!msgsEl)return;
+  if(!window._commDb){
+    msgsEl.innerHTML='<div style="text-align:center;font-size:12px;color:var(--ink3);padding:20px;">Chargement...</div>';
+    return;
+  }
+  msgsEl.innerHTML='<div style="text-align:center;font-size:12px;color:var(--ink3);">Chargement...</div>';
+  var col=window._commDb.collection;
+  var q=window._commDb.query;
+  var ob=window._commDb.orderBy;
+  var ons=window._commDb.onSnapshot;
+  var lim=window._commDb.limit;
+  unsubComm=ons(q(col(window._firestoreDb,"communautes",commId,"messages"),ob("createdAt","asc"),lim(100)),function(snap){
+    msgsEl.innerHTML="";
+    if(snap.empty){
+      msgsEl.innerHTML='<div style="text-align:center;padding:30px 20px;font-size:13px;color:var(--ink3);">Aucun message.<br>Soyez le premier !</div>';
+      return;
+    }
+    snap.docs.forEach(function(d){
+      var m=d.data();
+      var isMe=(m.authorId===window._uid());
+      var av=(m.authorName||"?").split(" ").map(function(n){return n[0];}).join("").toUpperCase().slice(0,2);
+      var time="";
+      if(m.createdAt&&m.createdAt.toDate){
+        var dt=m.createdAt.toDate();
+        var now=new Date();
+        var diff=(now-dt)/1000;
+        if(diff<60)time="A l'instant";
+        else if(diff<3600)time=Math.floor(diff/60)+"min";
+        else if(diff<86400)time=Math.floor(diff/3600)+"h";
+        else time=dt.toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+      }
+      var div=document.createElement("div");
+      div.style.cssText="display:flex;gap:8px;align-items:flex-start;"+(isMe?"flex-direction:row-reverse;":"");
+      var bubStyle=isMe
+        ?"background:var(--ink);color:#fff;border-radius:10px 3px 10px 10px;"
+        :"background:var(--w);color:var(--ink);border:1px solid var(--bg2);border-radius:3px 10px 10px 10px;";
+      var metaAlign=isMe?"text-align:right;":"text-align:left;";
+      div.innerHTML=
+        '<div style="width:30px;height:30px;border-radius:50%;background:var(--t3);color:var(--t2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;">'+av+'</div>'
+        +'<div style="max-width:78%;">'
+        +'<div style="font-size:10px;color:var(--ink3);margin-bottom:3px;'+metaAlign+'">'+m.authorName+' &middot; '+time+'</div>'
+        +'<div style="padding:8px 12px;font-size:13px;line-height:1.5;'+bubStyle+'">'+m.text+'</div>'
+        +'</div>';
+      msgsEl.appendChild(div);
+    });
+    msgsEl.scrollTop=msgsEl.scrollHeight;
+  });
+}
+function postCommMsg(commId){
+  var inp=document.getElementById("comm-input");
+  if(!inp)return;
+  var v=inp.value.trim();
+  if(!v)return;
+  if(!window._commDb){showToast("Connexion requise");return;}
+  var authorName=document.getElementById("ph-name").textContent||"Membre";
+  var add=window._commDb.addDoc;
+  var col=window._commDb.collection;
+  var sts=window._commDb.serverTimestamp;
+  inp.value="";
+  add(col(window._firestoreDb,"communautes",commId,"messages"),{text:v,authorId:window._uid(),authorName:authorName,createdAt:sts()}).catch(function(e){console.error(e);});
+}
+function closeComm(){
+  if(unsubComm){unsubComm();unsubComm=null;}
+  document.getElementById("comm-det-view").style.display="none";
+  document.getElementById("comm-list-view").style.display="block";
+}
+
+
 </script>
 </body>
 </html>
@@ -1181,3 +1271,6 @@ function calNav(dir){
 (function(){const orig=window.goScr;window.goScr=function(id,el){orig(id,el);if(id==="agenda")setTimeout(renderCal,50);};})();
 setTimeout(renderCal,800);
 </script>
+
+</body>
+</html>
