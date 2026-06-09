@@ -937,6 +937,7 @@ async function loadReseauOffers(){
         const div=document.createElement("div");div.className="reseau-member";div.onclick=()=>openMemberModal(m.id,m.data);
         var cBtn = m.isMe ? '<button class="reseau-contact" onclick="event.stopPropagation();goScr(\'profil\')">Mon profil</button>' : '<button class="reseau-contact" onclick="event.stopPropagation();ouvrirMsg(&quot;'+m.name+'&quot;,&quot;'+m.id+'&quot;)">Contacter</button>';
         div.innerHTML='<div class="av av-s" style="background:var(--t3);color:var(--t2);">'+ini(m.name)+'</div><div style="flex:1;min-width:0;"><div class="reseau-name">'+m.name+'</div><div class="reseau-detail" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+m.detail+'</div></div>'+cBtn;
+        el.appendChild(div);
       });
     });
   }catch(e){console.error("loadReseauOffers",e);}
