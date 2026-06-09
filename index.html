@@ -682,8 +682,7 @@
           <div class="stitle" style="margin-bottom:0;">Fil communauté</div>
           <button class="mc-see" onclick="postVictory()">+ Partager</button>
         </div>
-        <div class="fi2item"><div class="av avs" style="background:#E6F7F5;color:#2A9D8F;">SM</div><div class="fib"><div class="fin">Sophie M. <span style="font-weight:400;color:var(--ink3);font-size:10px;">victoire</span></div><div class="fit">Premier entretien chez Michelin obtenu ! </div><div class="reacts"><span class="react" onclick="react(this,'')"> 12</span><span class="react" onclick="react(this,'')"> 5</span></div></div><span class="ftm">9min</span></div>
-        <div class="fi2item"><div class="av avs" style="background:#FCE8F0;color:#C0194A;">AC</div><div class="fib"><div class="fin">Amira C. <span style="font-weight:400;color:var(--ink3);font-size:10px;">bon plan</span></div><div class="fit">DRH Doctolib cherche une dir. marketing — contact direct possible</div><div class="reacts"><span class="react" onclick="react(this,'')"> 15</span><span class="react" onclick="react(this,'')"> 9</span></div></div><span class="ftm">2h</span></div>
+        <div id="feed-list"><div style="font-size:12px;color:var(--ink3);padding:12px 0;font-style:italic;">Aucune publication. Partagez une victoire ou un bon plan.</div></div>
       </div>
     </div>
 
@@ -1138,9 +1137,10 @@
     const ini=(a.authorName||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
     const date=a.createdAt?.toDate?a.createdAt.toDate().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'';
     view.innerHTML=`
-      <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
-        <button class="btn btg btsm" onclick="closeBlogPost()">← Retour</button>
-        ${window._isAdmin?`<button class="btn btsm" style="color:var(--red);border-color:var(--red);" onclick="deleteArticle('${id}')">Supprimer</button>`:''}
+      <div style="margin-bottom:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button class="btn btg btsm" onclick="closeBlogPost()">← Articles</button>
+        <button class="btn btg btsm" onclick="goScr('accueil')">Accueil</button>
+        ${window._isAdmin?`<button class="btn btsm" style="margin-left:auto;color:var(--red);border:1px solid var(--red);background:transparent;" onclick="deleteArticle('${id}')">Supprimer</button>`:''}
       </div>
       ${a.imageUrl?`<div class="bp-img-wrap" style="border-radius:var(--rl);overflow:hidden;margin-bottom:18px;"><img src="${a.imageUrl}" alt=""/></div>`:''}
       <h1 style="font-family:var(--fb);font-size:22px;font-weight:600;line-height:1.3;margin-bottom:10px;">${a.title}</h1>
@@ -1944,7 +1944,11 @@ function fChip(el){const row=el.parentElement;row.querySelectorAll('.fc').forEac
 
   // BLOG
   function showBlogEditor(){document.getElementById('blog-list').style.display='none';document.getElementById('blog-editor').style.display='block';document.getElementById('blog-post-view').style.display='none';}
-  function closeBlogEditor(){document.getElementById('blog-list').style.display='block';document.getElementById('blog-editor').style.display='none';document.getElementById('blog-post-view').style.display='none';}
+  function closeBlogEditor(){
+    document.getElementById('blog-list').style.display='block';
+    document.getElementById('blog-editor').style.display='none';
+    document.getElementById('blog-post-view').style.display='none';
+  }
   function fmtText(cmd,val){document.getElementById('editor-area').focus();document.execCommand(cmd,false,val||null);}
   function previewImg(input){
     if(!input.files||!input.files[0])return;
@@ -1988,7 +1992,11 @@ function fChip(el){const row=el.parentElement;row.querySelectorAll('.fc').forEac
     document.getElementById('blog-editor').style.display='none';
     view.style.display='block';
   }
-  function closeBlogPost(){document.getElementById('blog-post-view').style.display='none';document.getElementById('blog-list').style.display='block';}
+  function closeBlogPost(){
+    document.getElementById('blog-post-view').style.display='none';
+    document.getElementById('blog-list').style.display='block';
+    document.getElementById('blog-editor').style.display='none';
+  }
 
   // MESSAGES
   // Ouvrir une conversation Firebase (appelé depuis ouvrirMessage)
