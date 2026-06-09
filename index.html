@@ -416,7 +416,20 @@ textarea.fi2{resize:vertical;min-height:70px;}select.fi2{cursor:pointer;}
     <!-- AGENDA -->
     <div id="scr-agenda" class="scr">
       <div class="p">
-        <div class="rowb" style="margin-bottom:12px;"><div style="font-size:16px;font-weight:600;">Agenda</div><button class="btn btn-p btn-sm" id="btn-add-event" onclick="showAddEvent()" style="display:none;">+ Créer</button></div>
+        <div class="rowb" style="margin-bottom:12px;">
+          <div style="font-size:16px;font-weight:600;">Agenda</div>
+          <button class="btn btn-p btn-sm" id="btn-add-event" onclick="showAddEvent()" style="display:none;">+ Créer un événement</button>
+        </div>
+        <!-- Mini calendrier -->
+        <div class="card" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <button onclick="calNav(-1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--bg2);background:var(--bg);cursor:pointer;font-size:13px;color:var(--ink2);">‹</button>
+            <span style="font-size:13px;font-weight:600;" id="cal-month-label"></span>
+            <button onclick="calNav(1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--bg2);background:var(--bg);cursor:pointer;font-size:13px;color:var(--ink2);">›</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;" id="cal-grid"></div>
+        </div>
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.10em;color:var(--ink3);margin-bottom:8px;">Événements à venir</div>
         <div id="agenda-events"><div class="empty"><div class="empty-line"></div><p>Aucun événement programmé.</p></div></div>
       </div>
     </div>
@@ -1129,3 +1142,42 @@ function closeComm(){document.getElementById("comm-det-view").style.display="non
 </script>
 </body>
 </html>
+<script>
+// CALENDRIER AGENDA
+let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
+const MOIS_FR=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+function renderCal(){
+  const lbl=document.getElementById("cal-month-label");
+  const grid=document.getElementById("cal-grid");
+  if(!lbl||!grid)return;
+  lbl.textContent=MOIS_FR[calMonth]+" "+calYear;
+  grid.innerHTML="";
+  ["Lu","Ma","Me","Je","Ve","Sa","Di"].forEach(j=>{
+    const d=document.createElement("div");
+    d.style.cssText="font-size:9px;font-weight:600;color:var(--ink3);text-align:center;padding:3px 0;text-transform:uppercase;";
+    d.textContent=j;grid.appendChild(d);
+  });
+  const first=new Date(calYear,calMonth,1).getDay();
+  const offset=first===0?6:first-1;
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  for(let i=0;i<offset;i++){grid.appendChild(document.createElement("div"));}
+  for(let d=1;d<=days;d++){
+    const el=document.createElement("div");
+    const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    el.style.cssText="aspect-ratio:1;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:"+(isToday?"700":"500")+";cursor:default;position:relative;"+(isToday?"background:var(--ink);color:#fff;":"color:var(--ink2);");
+    el.textContent=d;
+    if(!isToday){el.onmouseover=()=>el.style.background="var(--bg2)";el.onmouseout=()=>el.style.background="";}
+    grid.appendChild(el);
+  }
+}
+function calNav(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCal();
+}
+// Hook sur goScr pour rendre le calendrier quand on accède à l'agenda
+(function(){const orig=window.goScr;window.goScr=function(id,el){orig(id,el);if(id==="agenda")setTimeout(renderCal,50);};})();
+setTimeout(renderCal,800);
+</script>
