@@ -925,10 +925,9 @@ async function loadReseauOffers(){
     const snap=await getDocs(collection(db,"users"));
     const types={entretien:[],simulation:[],pitch:[],relation:[]};
     snap.docs.forEach(d=>{
-      if(d.id===uid)return;
       const u=d.data();if(!u.reseauOffers||!u.reseauOffers.length)return;
-      const name=u.displayName||"Membre";
-      u.reseauOffers.forEach(type=>{if(types[type])types[type].push({id:d.id,name,detail:u.reseauDetail||u.sector||"",data:u});});
+      const name=(d.id===uid?"Vous ("+( u.displayName||"moi")+")":(u.displayName||"Membre"));
+      u.reseauOffers.forEach(type=>{if(types[type])types[type].push({id:d.id,name:d.id===uid?(u.displayName||"Moi"):name,detail:u.reseauDetail||u.sector||"",data:u,isMe:d.id===uid});});
     });
     Object.entries(types).forEach(([type,members])=>{
       const el=document.getElementById("rt-"+type);if(!el)return;
@@ -936,8 +935,8 @@ async function loadReseauOffers(){
       el.innerHTML="";
       members.slice(0,3).forEach(m=>{
         const div=document.createElement("div");div.className="reseau-member";div.onclick=()=>openMemberModal(m.id,m.data);
-        div.innerHTML='<div class="av av-s" style="background:var(--t3);color:var(--t2);">'+ini(m.name)+'</div><div style="flex:1;min-width:0;"><div class="reseau-name">'+m.name+'</div><div class="reseau-detail" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+m.detail+'</div></div><button class="reseau-contact" onclick="event.stopPropagation();ouvrirMsg(\''+m.name+"','"+m.id+"')\">" + "Contacter</button>";
-        el.appendChild(div);
+        var cBtn = m.isMe ? '<button class="reseau-contact" onclick="event.stopPropagation();goScr(\'profil\')">Mon profil</button>' : '<button class="reseau-contact" onclick="event.stopPropagation();ouvrirMsg(&quot;'+m.name+'&quot;,&quot;'+m.id+'&quot;)">Contacter</button>';
+        div.innerHTML='<div class="av av-s" style="background:var(--t3);color:var(--t2);">'+ini(m.name)+'</div><div style="flex:1;min-width:0;"><div class="reseau-name">'+m.name+'</div><div class="reseau-detail" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+m.detail+'</div></div>'+cBtn;
       });
     });
   }catch(e){console.error("loadReseauOffers",e);}
