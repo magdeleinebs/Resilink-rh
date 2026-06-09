@@ -925,23 +925,61 @@ async function loadReseauOffers(){
     const snap=await getDocs(collection(db,"users"));
     const types={entretien:[],simulation:[],pitch:[],relation:[]};
     snap.docs.forEach(d=>{
-      const u=d.data();if(!u.reseauOffers||!u.reseauOffers.length)return;
-      const name=(d.id===uid?"Vous ("+( u.displayName||"moi")+")":(u.displayName||"Membre"));
-      u.reseauOffers.forEach(type=>{if(types[type])types[type].push({id:d.id,name:d.id===uid?(u.displayName||"Moi"):name,detail:u.reseauDetail||u.sector||"",data:u,isMe:d.id===uid});});
+      const u=d.data();
+      if(!u.reseauOffers||!u.reseauOffers.length)return;
+      const isMe=(d.id===uid);
+      const name=u.displayName||"Membre";
+      u.reseauOffers.forEach(function(type){
+        if(types[type]!==undefined){
+          types[type].push({id:d.id,name:name,detail:u.reseauDetail||u.sector||"",data:u,isMe:isMe});
+        }
+      });
     });
-    Object.entries(types).forEach(([type,members])=>{
-      const el=document.getElementById("rt-"+type);if(!el)return;
-      if(!members.length){el.innerHTML='<div style="font-size:11px;color:var(--ink3);font-style:italic;">Aucun membre disponible.</div>';return;}
+    var typeLabels={entretien:"Entretien réseau",simulation:"Simulation d'entretien",pitch:"Préparation pitch",relation:"Mise en relation"};
+    Object.keys(types).forEach(function(type){
+      var members=types[type];
+      var el=document.getElementById("rt-"+type);
+      if(!el)return;
+      if(!members.length){
+        el.innerHTML='<div style="font-size:11px;color:var(--ink3);font-style:italic;">Aucun membre disponible.</div>';
+        return;
+      }
       el.innerHTML="";
-      members.slice(0,3).forEach(m=>{
-        const div=document.createElement("div");div.className="reseau-member";div.onclick=()=>openMemberModal(m.id,m.data);
-        var cBtn = m.isMe ? '<button class="reseau-contact" onclick="event.stopPropagation();goScr(\'profil\')">Mon profil</button>' : '<button class="reseau-contact" onclick="event.stopPropagation();ouvrirMsg(&quot;'+m.name+'&quot;,&quot;'+m.id+'&quot;)">Contacter</button>';
-        div.innerHTML='<div class="av av-s" style="background:var(--t3);color:var(--t2);">'+ini(m.name)+'</div><div style="flex:1;min-width:0;"><div class="reseau-name">'+m.name+'</div><div class="reseau-detail" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+m.detail+'</div></div>'+cBtn;
+      members.slice(0,3).forEach(function(m){
+        var div=document.createElement("div");
+        div.className="reseau-member";
+        div.style.cursor="pointer";
+        var avEl=document.createElement("div");
+        avEl.className="av av-s";
+        avEl.style.background="var(--t3)";
+        avEl.style.color="var(--t2)";
+        avEl.textContent=ini(m.name);
+        var infoEl=document.createElement("div");
+        infoEl.style.flex="1";
+        infoEl.style.minWidth="0";
+        infoEl.innerHTML='<div class="reseau-name">'+m.name+'</div><div class="reseau-detail" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+m.detail+'</div>';
+        var btnEl=document.createElement("button");
+        btnEl.className="reseau-contact";
+        btnEl.textContent=m.isMe?"Mon profil":"Contacter";
+        if(m.isMe){
+          btnEl.onclick=function(e){e.stopPropagation();goScr("profil");};
+        } else {
+          (function(mn,mid){
+            btnEl.onclick=function(e){e.stopPropagation();ouvrirMsg(mn,mid);};
+          })(m.name,m.id);
+        }
+        div.appendChild(avEl);
+        div.appendChild(infoEl);
+        div.appendChild(btnEl);
+        div.onclick=function(){openMemberModal(m.id,m.data);};
         el.appendChild(div);
       });
     });
-  }catch(e){console.error("loadReseauOffers",e);}
+  }catch(e){
+    console.error("loadReseauOffers erreur:",e);
+  }
 }
+
 
 window.openMemberModal=function(memberId,data){
   const name=data.displayName||"Membre";
