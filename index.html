@@ -1000,7 +1000,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, addDoc, getDocs, onSnapshot, updateDoc, query, orderBy, limit, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const cfg={apiKey:"AIzaSyCgAS2_hOgHlQNrFW25StgZ6Je0QcwTY-g",authDomain:"resilink-rh.firebaseapp.com",projectId:"resilink-rh",storageBucket:"resilink-rh.firebasestorage.app",messagingSenderId:"771333810630",appId:"1:771333810630:web:7795c8bef2e9cedc652ac7"};
   const fba=initializeApp(cfg),auth=getAuth(fba),db=getFirestore(fba),gp=new GoogleAuthProvider();
@@ -1029,6 +1029,7 @@
     document.getElementById('phn').textContent=name;
     document.getElementById('pf-n').value=name;
     getDoc(doc(db,'users',uid)).then(s=>{
+      window._isAdmin = false; // par défaut
       if(s.exists()){
         const d=s.data();
         if(d.title){document.getElementById('pf-t').value=d.title;document.getElementById('pht').textContent=d.title;}
@@ -1096,6 +1097,236 @@
 
   window._addCand=async data=>{if(uid)await addDoc(collection(db,'users',uid,'candidatures'),{...data,createdAt:serverTimestamp()});};
   window._updCand=async(id,data)=>{if(uid)await updateDoc(doc(db,'users',uid,'candidatures',id),data);};
+  // ═══ ARTICLES FIREBASE ═══
+  window.loadArticles = async function(){
+    try{
+      const q=query(collection(db,'articles'),orderBy('createdAt','desc'),limit(20));
+      const snap=await getDocs(q);
+      const list=document.getElementById('blog-posts');
+      const homeList=document.getElementById('home-articles-list');
+      if(snap.empty){
+        if(list) list.innerHTML='<div id="blog-empty" style="text-align:center;padding:40px 20px;"><div style="width:28px;height:2px;background:var(--bg2);margin:0 auto 12px;"></div><p style="font-size:13px;color:var(--ink3);">Aucun article publié.<br>Soyez le premier à partager votre expérience.</p></div>';
+        if(homeList) homeList.innerHTML='<div style="font-size:12px;color:var(--ink3);padding:12px 0;font-style:italic;">Aucun article publié. Soyez le premier à écrire.</div>';
+        return;
+      }
+      if(list) list.innerHTML='';
+      if(homeList) homeList.innerHTML='';
+      snap.docs.forEach(d=>{
+        const a=d.data();
+        const ini=(a.authorName||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+        const date=a.createdAt?.toDate?a.createdAt.toDate().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'';
+        // Blog list
+        if(list){
+          const el=document.createElement('div');el.className='blog-post';el.dataset.id=d.id;
+          el.innerHTML=`<div class="bp-img-wrap">${a.imageUrl?`<img src="${a.imageUrl}" alt=""/>`:'<div style="font-size:40px;color:var(--bg2);">📝</div>'}</div><div class="bp-body"><div class="bp-cats"><span class="tg tgt">${a.category||'Article'}</span></div><div class="bp-title">${a.title}</div><div class="bp-excerpt">${a.excerpt||''}</div><div class="bp-meta"><div class="bp-ava" style="background:var(--t3);color:var(--t2);">${ini}</div><span class="bp-author">${a.authorName||'Membre'}</span><span class="bp-date">${date}</span></div></div>`;
+          el.onclick=()=>openArticle(d.id,a);
+          list.appendChild(el);
+        }
+        // Home list (3 premiers)
+        if(homeList && homeList.children.length<3){
+          const el=document.createElement('div');el.className='art-card';
+          el.innerHTML=`<div class="art-ico">${ini}</div><div class="art-body"><div class="art-cat">${a.category||'Article'}</div><div class="art-title">${a.title}</div><div class="art-meta">${a.authorName||'Membre'} · ${date}</div></div>`;
+          el.onclick=()=>{goScr('blog');openArticle(d.id,a);};
+          homeList.appendChild(el);
+        }
+      });
+    }catch(e){console.log('loadArticles:',e);}
+  }
+
+  function openArticle(id,a){
+    const view=document.getElementById('blog-post-view');
+    const ini=(a.authorName||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const date=a.createdAt?.toDate?a.createdAt.toDate().toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'}):'';
+    view.innerHTML=`
+      <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+        <button class="btn btg btsm" onclick="closeBlogPost()">← Retour</button>
+        ${window._isAdmin?`<button class="btn btsm" style="color:var(--red);border-color:var(--red);" onclick="deleteArticle('${id}')">Supprimer</button>`:''}
+      </div>
+      ${a.imageUrl?`<div class="bp-img-wrap" style="border-radius:var(--rl);overflow:hidden;margin-bottom:18px;"><img src="${a.imageUrl}" alt=""/></div>`:''}
+      <h1 style="font-family:var(--fb);font-size:22px;font-weight:600;line-height:1.3;margin-bottom:10px;">${a.title}</h1>
+      <div class="bp-meta" style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--bg2);">
+        <div class="bp-ava" style="background:var(--t3);color:var(--t2);">${ini}</div>
+        <span class="bp-author">${a.authorName||'Membre'}</span>
+        <span class="bp-date">${date}</span>
+      </div>
+      <div style="font-size:14px;line-height:1.8;color:var(--ink2);font-weight:300;">${a.content||''}</div>`;
+    document.getElementById('blog-list').style.display='none';
+    document.getElementById('blog-editor').style.display='none';
+    view.style.display='block';
+  }
+
+  async function deleteArticle(id){
+    if(!confirm('Supprimer cet article ?'))return;
+    await deleteDoc(doc(db,'articles',id));
+    closeBlogPost();
+    loadArticles();
+    showToast('Article supprimé');
+  }
+
+  // ═══ FEED FIREBASE ═══
+  window.loadFeed = async function(){
+    try{
+      const q=query(collection(db,'feed'),orderBy('createdAt','desc'),limit(20));
+      const snap=await getDocs(q);
+      const feedEl=document.getElementById('feed-list');
+      if(!feedEl)return;
+      if(snap.empty){feedEl.innerHTML='<div style="font-size:12px;color:var(--ink3);padding:12px 0;font-style:italic;">Aucune publication. Partagez une victoire ou un bon plan.</div>';return;}
+      feedEl.innerHTML='';
+      snap.docs.forEach(d=>{
+        const f=d.data();
+        const ini=(f.authorName||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+        const time=f.createdAt?.toDate?formatMsgTime(f.createdAt.toDate()):'';
+        const el=document.createElement('div');el.className='feed-card';
+        el.innerHTML=`<div class="av avs" style="background:var(--t3);color:var(--t2);">${ini}</div><div class="fc-body"><div class="fc-name">${f.authorName||'Membre'} <span class="fc-type">· ${f.type||'partage'}</span></div><div class="fc-txt">${f.text}</div></div><span class="fc-time">${time}</span>`;
+        feedEl.appendChild(el);
+      });
+    }catch(e){console.log('loadFeed:',e);}
+  }
+
+  // ═══ OFFRES FIREBASE ═══
+  window.loadOffres = async function(){
+    try{
+      const q=query(collection(db,'offres'),orderBy('createdAt','desc'),limit(50));
+      const snap=await getDocs(q);
+      const oflist=document.getElementById('oflist');
+      const cooptlist=document.getElementById('coopt-list');
+      if(snap.empty){
+        if(oflist)oflist.innerHTML='<div style="text-align:center;padding:40px 20px;"><div style="width:28px;height:2px;background:var(--bg2);margin:0 auto 12px;"></div><p style="font-size:13px;color:var(--ink3);">Aucune offre pour le moment.</p></div>';
+        if(cooptlist)cooptlist.innerHTML='<div style="font-size:12px;color:rgba(255,255,255,.4);font-style:italic;text-align:center;padding:8px 0;">Aucune offre pour le moment.</div>';
+        return;
+      }
+      if(oflist)oflist.innerHTML='';
+      if(cooptlist)cooptlist.innerHTML='';
+      snap.docs.forEach(d=>{
+        const o=d.data();
+        const btnLabel=o.lien?'Voir l'offre':'Postuler';
+        const btnAction=o.lien?`window.open('${o.lien}','_blank')`:`ouvrirMessage('${o.authorName||'le déposant'}')`;
+        if(oflist){
+          const el=document.createElement('div');el.className='ofc';
+          el.innerHTML=`<div class="ofh"><div class="oflogo" style="font-size:11px;font-weight:700;color:var(--ink3);">${(o.authorName||'?').split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2)}</div><div><div class="oft">${o.title}</div><div class="ofco">${o.company} · ${o.location||'—'} · ${o.type}</div></div></div><div class="oftt"><span class="tg tgt">${o.type}</span></div><div class="offt"><div class="ofby">Partagé par ${o.authorName||'un membre'}</div><div style="display:flex;gap:6px;">${window._isAdmin?`<button onclick="deleteOffre('${d.id}')" style="padding:6px 12px;border-radius:var(--rf);border:1px solid var(--red);background:transparent;color:var(--red);font-size:11px;cursor:pointer;">Supprimer</button>`:''}<button class="ofbtn" onclick="${btnAction}">${btnLabel}</button></div></div>`;
+          oflist.appendChild(el);
+        }
+        if(cooptlist){
+          const el=document.createElement('div');el.className='coopt-item';
+          el.innerHTML=`<div class="coopt-info"><div class="coopt-role">${o.title}</div><div class="coopt-co">${o.company} · ${o.location||'—'}</div><div class="coopt-by">Par ${o.authorName||'un membre'}</div></div><span class="coopt-tag">${o.type}</span><button class="coopt-apply" onclick="${btnAction}">${btnLabel}</button>`;
+          cooptlist.appendChild(el);
+        }
+      });
+    }catch(e){console.log('loadOffres:',e);}
+  }
+
+  async function deleteOffre(id){
+    if(!confirm('Supprimer cette offre ?'))return;
+    await deleteDoc(doc(db,'offres',id));
+    loadOffres();showToast('Offre supprimée');
+  }
+
+  // ═══ ÉVÉNEMENTS FIREBASE ═══
+  window.loadEvenements = async function(){
+    try{
+      const q=query(collection(db,'evenements'),orderBy('date','asc'));
+      const snap=await getDocs(q);
+      const agendaEl=document.getElementById('agenda-events');
+      const homeEl=document.getElementById('home-events');
+      if(snap.empty){
+        if(agendaEl)agendaEl.innerHTML='<div style="text-align:center;padding:40px 20px;"><div style="width:28px;height:2px;background:var(--bg2);margin:0 auto 12px;"></div><p style="font-size:13px;color:var(--ink3);">Aucun événement programmé.</p></div>';
+        if(homeEl)homeEl.innerHTML='<div style="text-align:center;padding:20px;"><div style="width:28px;height:2px;background:var(--bg2);margin:0 auto 10px;"></div><p style="font-size:12px;color:var(--ink3);">Aucun événement programmé.</p></div>';
+        return;
+      }
+      if(agendaEl)agendaEl.innerHTML='';
+      if(homeEl)homeEl.innerHTML='';
+      // Stocker pour le calendrier
+      window._agendaEvs=snap.docs.map(d=>({date:d.data().date,t:d.data().title,col:'#2A9D8F'}));
+      snap.docs.forEach(d=>{
+        const ev=d.data();
+        const parts=(ev.date||'').split('-');
+        const mo=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'][parseInt(parts[1])-1]||'';
+        const inscrits=ev.inscrits||0, places=ev.places||20;
+        const pct=Math.round(inscrits/places*100);
+        const cardHTML=`
+          ${ev.imageUrl?`<img style="width:100%;height:140px;object-fit:cover;border-radius:var(--rl) var(--rl) 0 0;" src="${ev.imageUrl}" alt=""/>`:''}
+          <div style="padding:14px;">
+            <div class="ec-top"><div class="ec-date"><div class="ec-day">${parts[2]||'?'}</div><div class="ec-mo">${mo}</div></div><div class="ec-inf"><h4>${ev.title}</h4><p>${ev.heure||''}</p></div></div>
+            ${ev.desc?`<div class="ev-topo">${ev.desc}</div>`:''}
+            <div class="ec-bot">
+              <div class="gw"><div class="gl">Places : ${inscrits}/${places}</div><div class="gt"><div class="gf" style="width:${pct}%;"></div></div></div>
+              <button class="jb" onclick="inscrireEvenement('${d.id}',this)">S'inscrire</button>
+              ${ev.teams?`<a class="teams-btn" href="${ev.teams}" target="_blank">Teams →</a>`:''}
+              ${window._isAdmin?`<button onclick="deleteEvenement('${d.id}')" style="padding:7px 12px;border-radius:var(--rf);border:1px solid var(--red);background:transparent;color:var(--red);font-size:11px;cursor:pointer;margin-left:4px;">Supprimer</button>`:''}
+            </div>
+          </div>`;
+        if(agendaEl){const el=document.createElement('div');el.className='ev-card';el.style.padding='0';el.innerHTML=cardHTML;agendaEl.appendChild(el);}
+        // Home : mini card
+        if(homeEl){
+          const el=document.createElement('div');el.className='ev-mini';el.onclick=()=>goScr('agenda');
+          el.innerHTML=`<div class="ev-mini-day">${parts[2]||'?'}</div><div class="ev-mini-info"><div class="ev-mini-title">${ev.title}</div><div class="ev-mini-sub">${ev.heure||''}</div></div><button class="ev-mini-jb" onclick="event.stopPropagation();inscrireEvenement('${d.id}',this)">S'inscrire</button>`;
+          homeEl.appendChild(el);
+        }
+      });
+      renderAgCal();
+    }catch(e){console.log('loadEvenements:',e);}
+  }
+
+  async function inscrireEvenement(evId,btn){
+    if(btn.classList.contains('joined')){btn.textContent="S'inscrire";btn.classList.remove('joined');return;}
+    btn.textContent='Inscrit(e)';btn.classList.add('joined');
+    await updateDoc(doc(db,'evenements',evId),{inscrits:(await getDoc(doc(db,'evenements',evId))).data().inscrits+1||1});
+    showToast('Inscription confirmée');
+  }
+
+  async function deleteEvenement(id){
+    if(!confirm('Supprimer cet événement ?'))return;
+    await deleteDoc(doc(db,'evenements',id));
+    loadEvenements();showToast('Événement supprimé');
+  }
+
+  window.doSignOut=async()=>
+  // Implémenter createEvent via window
+  window._publishPost = async function({t,exc,cat,content,imgSrc}){
+    const authorName=document.getElementById('phn')?.textContent||'Membre';
+    try{
+      await addDoc(collection(db,'articles'),{
+        title:t,excerpt:exc,category:cat,content,
+        imageUrl:imgSrc&&imgSrc!==window.location.href?imgSrc:'',
+        authorId:uid,authorName,createdAt:serverTimestamp()
+      });
+      document.getElementById('post-title').value='';
+      document.getElementById('post-excerpt').value='';
+      document.getElementById('editor-area').innerHTML='';
+      const prev=document.getElementById('post-img-preview');if(prev)prev.style.display='none';
+      if(typeof closeBlogEditor==='function')closeBlogEditor();
+      showToast('Article publié');
+      window.loadArticles();
+    }catch(e){console.log(e);showToast('Erreur lors de la publication');}
+  };
+
+  window._postVictory = async function(t){
+    const authorName=document.getElementById('phn')?.textContent||'Membre';
+    try{
+      await addDoc(collection(db,'feed'),{
+        text:t,type:'victoire',authorId:uid,authorName,createdAt:serverTimestamp()
+      });
+      showToast('Publié !');window.loadFeed();
+    }catch(e){console.log(e);}
+  };
+
+  window._createEvent = async function({t,d,h,desc,teams,places,imgSrc}){
+    try{
+      await addDoc(collection(db,'evenements'),{
+        title:t,date:d,heure:h,desc,teams,places,inscrits:0,
+        imageUrl:imgSrc&&imgSrc!==window.location.href?imgSrc:'',
+        createdAt:serverTimestamp()
+      });
+      closeMod();showToast('Événement créé');loadEvenements();
+    }catch(e){console.log(e);showToast('Erreur lors de la création');}
+  };
+
+  // Implémenter sendChat via window
+  window._sendChat = async function(v){
+    if(window._attachedCV){ await window.sendFirebaseMsg('','cv',window._attachedCV); removeCV(); }
+    if(v){ await window.sendFirebaseMsg(v,'text'); document.getElementById('chin').value=''; }
+  };
+
   window.doSignOut=async()=>{if(unsub)unsub();if(window._unsubConvs)window._unsubConvs();if(window._unsubMsgs)window._unsubMsgs();await signOut(auth);document.getElementById('app').style.display='none';document.getElementById('landing').style.display='block';};
 
   // ═══ MESSAGERIE FIREBASE ═══
@@ -1104,7 +1335,7 @@
   window._attachedCV = null;
 
   // Charger toutes les conversations de l'utilisateur
-  function loadConversations(){
+  window.loadConversations = function(){
     if(!uid) return;
     if(window._unsubConvs) window._unsubConvs();
     const q = query(
@@ -1272,7 +1503,7 @@
   }
 
   // Charger les membres qui proposent au réseau
-  async function loadReseauOffers(){
+  window.loadReseauOffers = async function(){
     try{
       const snap=await getDocs(collection(db,'users'));
       const types={entretien:[],simulation:[],pitch:[],relation:[]};
@@ -1302,7 +1533,7 @@
   }
 
   // Charger les nouveaux membres
-  async function loadNewbies(){
+  window.loadNewbies = async function(){
     try{
       const q=query(collection(db,'users'),orderBy('createdAt','desc'),limit(8));
       const snap=await getDocs(q);
@@ -1510,29 +1741,14 @@
     r.readAsDataURL(input.files[0]);
   }
   function createEvent(){
-    const t=document.getElementById('ev-t').value.trim();
+    const t=document.getElementById('ev-t').value.trim();if(!t)return;
     const d=document.getElementById('ev-d').value;
-    const h=document.getElementById('ev-h').value;
+    const h=document.getElementById('ev-h').value||'';
     const desc=document.getElementById('ev-desc')?.value.trim()||'';
     const teams=document.getElementById('ev-teams')?.value.trim()||'';
-    const imgSrc=document.getElementById('ev-img-preview')?.src||'';
-    if(!t)return;
-    const ce=document.getElementById('custom-events');
-    const el=document.createElement('div');el.className='ev-card';
-    const parts=d.split('-');
-    const mo=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'][parseInt(parts[1])-1]||'';
-    el.innerHTML=`
-      ${imgSrc&&imgSrc!==window.location.href?`<img src="${imgSrc}" style="width:100%;height:140px;object-fit:cover;border-radius:var(--rl) var(--rl) 0 0;margin:-14px -14px 12px -14px;width:calc(100% + 28px);" alt=""/>`:'' }
-      <div class="ec-top">
-        <div class="ec-date"><div class="ec-day">${parts[2]||'?'}</div><div class="ec-mo">${mo}</div></div>
-        <div class="ec-inf"><h4>${t}</h4><p>${h||'Heure à confirmer'} · Créé par toi</p></div>
-      </div>
-      ${desc?`<div class="ev-topo">${desc}</div>`:''}
-      <div class="ec-bot" style="margin-top:${desc?'':'0'}">
-        <div class="gw"><div class="gl">Places : 0/20</div><div class="gt"><div class="gf" style="width:0%"></div></div></div>
-        ${teams?`<a class="teams-btn" href="${teams}" target="_blank" onclick="event.stopPropagation()">🟣 Teams</a>`:''}
-      </div>`;
-    ce.prepend(el);closeMod();showToast();renderCal();renderAgCal();
+    const places=parseInt(document.getElementById('ev-places')?.value)||20;
+    const imgSrc=document.getElementById('ev-img-p')?.src||'';
+    if(window._createEvent) window._createEvent({t,d,h,desc,teams,places,imgSrc});
   }
 
   // KANBAN
@@ -1633,8 +1849,9 @@
     }
   },400);
 }
-function saveOffre(){const t=document.getElementById('ot').value.trim(),co=document.getElementById('oco').value.trim();if(!t||!co)return;const l=document.getElementById('oflist');const d=document.createElement('div');d.className='ofc';d.innerHTML=`<div class="ofh"><div class="oflogo"></div><div><div class="oft">${t}</div><div class="ofco">${co} · ${document.getElementById('oloc').value||'—'} · ${document.getElementById('oty').value}</div></div></div><div class="oftt"><span class="tg tgt">${document.getElementById('oty').value}</span></div><div class="offt"><div class="ofby">Partagé par vous</div><button class="ofbtn" onclick="(typeof lien!=='undefined'&&lien)?window.open(lien,'_blank'):postuler(t,co,'vous','')" onclick="postuler(this.closest('.ofc').querySelector('.oft').textContent, this.closest('.ofc').querySelector('.ofco').textContent, this.closest('.ofc').querySelector('.ofby').textContent.replace('Partagé par ',''), '')">Postuler</button></div>`;l.prepend(d);closeMod();showToast();}
-  function fChip(el){const row=el.parentElement;row.querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+async 
+
+function fChip(el){const row=el.parentElement;row.querySelectorAll('.fc').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
 
   // MATCHING
   const PROFILES=[
@@ -1796,11 +2013,10 @@ function saveOffre(){const t=document.getElementById('ot').value.trim(),co=docum
     const cr=document.getElementById('cv-remove'); if(cr)cr.style.display='none';
   }
 
-  async function sendChat(){
+  function sendChat(){
     const i=document.getElementById('chin'), v=i.value.trim();
     if(!v && !window._attachedCV) return;
-    if(window._attachedCV){ await window.sendFirebaseMsg('','cv',window._attachedCV); removeCV(); }
-    if(v){ await window.sendFirebaseMsg(v,'text'); i.value=''; }
+    if(window._sendChat) window._sendChat(v);
   }
 
   function attachCV(input){
