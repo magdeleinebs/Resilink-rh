@@ -351,7 +351,7 @@ textarea.fi2{resize:vertical;min-height:70px;}select.fi2{cursor:pointer;}
       <div style="background:rgba(255,255,255,.03);padding:22px 18px;"><div style="width:24px;height:1px;background:var(--gold);margin-bottom:12px;"></div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:6px;">Cooptation &amp; Réseau</div><div style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;font-weight:300;">Offres exclusives entre membres.</div></div>
       <div style="background:rgba(255,255,255,.03);padding:22px 18px;"><div style="width:24px;height:1px;background:var(--gold);margin-bottom:12px;"></div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:6px;">Communautés de pairs</div><div style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;font-weight:300;">Par secteur et niveau hiérarchique.</div></div>
     </div>
-    <div style="text-align:center;margin-top:20px;font-size:11px;color:rgba(255,255,255,.3);">© 2025 RésiLink RH · <a href="#" onclick="showLegal();return false;" style="color:rgba(255,255,255,.3);">Mentions légales</a> · <a href="#" onclick="showPrivacy();return false;" style="color:rgba(255,255,255,.3);">Confidentialité</a> · <span ondblclick="openAdmin()" style="cursor:default;">·</span></div>
+    <div style="text-align:center;margin-top:20px;font-size:11px;color:rgba(255,255,255,.3);">© 2025 RésiLink RH · <a href="#" onclick="showLegal();return false;" style="color:rgba(255,255,255,.3);">Mentions légales</a> · <a href="#" onclick="showPrivacy();return false;" style="color:rgba(255,255,255,.3);">Confidentialité</a> · <span ondblclick="promptAdmin()" style="cursor:default;">·</span></div>
   </div>
 </div>
 
@@ -558,7 +558,7 @@ textarea.fi2{resize:vertical;min-height:70px;}select.fi2{cursor:pointer;}
         </div>
         <button class="btn btn-p btn-fu" onclick="saveProfile()" style="margin-bottom:8px;">Enregistrer le profil</button>
         <button class="btn btn-g btn-fu" onclick="doSignOut()">Se déconnecter</button>
-        <div style="text-align:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--bg2);font-size:10px;color:var(--ink3);">© 2025 RésiLink RH · <a href="#" onclick="showLegal();return false;" style="color:var(--ink3);">Mentions légales</a> · <a href="#" onclick="showPrivacy();return false;" style="color:var(--ink3);">Confidentialité</a><span ondblclick="openAdmin()" style="margin-left:8px;cursor:default;color:var(--bg2);">·</span></div>
+        <div style="text-align:center;margin-top:18px;padding-top:14px;border-top:1px solid var(--bg2);font-size:10px;color:var(--ink3);">© 2025 RésiLink RH · <a href="#" onclick="showLegal();return false;" style="color:var(--ink3);">Mentions légales</a> · <a href="#" onclick="showPrivacy();return false;" style="color:var(--ink3);">Confidentialité</a><span ondblclick="promptAdmin()" style="margin-left:8px;cursor:default;color:var(--bg2);">·</span></div>
       </div>
     </div>
   </div>
@@ -1269,6 +1269,18 @@ function closeComm(){
 
 
 </script>
+
+<script>
+function promptAdmin(){
+  var pwd=prompt("Mot de passe administrateur :");
+  if(pwd==="Dimitriisback2026*"){
+    document.getElementById("admin-panel").style.display="block";
+    if(window.refreshAdmin)window.refreshAdmin();
+  } else if(pwd!==null){
+    alert("Mot de passe incorrect.");
+  }
+}
+</script>
 </body>
 </html>
 <script>
@@ -1311,5 +1323,17 @@ function calNav(dir){
 setTimeout(renderCal,800);
 </script>
 
+
+<script>
+function promptAdmin(){
+  var pwd=prompt("Mot de passe administrateur :");
+  if(pwd==="Dimitriisback2026*"){
+    document.getElementById("admin-panel").style.display="block";
+    if(window.refreshAdmin)window.refreshAdmin();
+  } else if(pwd!==null){
+    alert("Mot de passe incorrect.");
+  }
+}
+</script>
 </body>
 </html>
